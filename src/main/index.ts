@@ -8,12 +8,17 @@ import { registerIpcHandlers } from "./ipc/register-ipc-handlers";
 import type { TabManager } from "./tabs/tab-manager";
 import { createTabManager } from "./tabs/tab-manager";
 
+const LIGHT_BACKGROUND = "#ffffff"; // must mirror --background in globals.css (oklch(1 0 0))
+const DARK_BACKGROUND = "#0a0a0a"; // must mirror .dark --background in globals.css (oklch(0.145 0 0))
+
 function createWindow(tabs: TabManager) {
   const window = new BrowserWindow({
     width: 1200,
     height: 800,
     show: false,
-    backgroundColor: nativeTheme.shouldUseDarkColors ? "#0a0a0a" : "#ffffff",
+    backgroundColor: nativeTheme.shouldUseDarkColors
+      ? DARK_BACKGROUND
+      : LIGHT_BACKGROUND,
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
