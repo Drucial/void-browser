@@ -6,6 +6,7 @@ import {
   SidebarContent,
   SidebarInset,
   SidebarProvider,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { tabQueries } from "@/hooks/tabs/tabs.queries";
 import { useTabActions } from "@/hooks/tabs/use-tab-actions";
@@ -39,8 +40,10 @@ export function BrowserShell() {
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <header className="p-2">
+        <header className="flex items-center gap-2 p-2">
+          <SidebarTrigger />
           <form
+            className="flex-1"
             onSubmit={(event) => {
               event.preventDefault();
               const address = new FormData(event.currentTarget).get("address");
