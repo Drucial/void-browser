@@ -25,6 +25,11 @@ export function recordVisit(db: AppDatabase, { url, title, visitedAt }: Visit) {
   });
 }
 
+/** Updates the title of an already-recorded url; does nothing for an unknown url. */
+export function setUrlTitle(db: AppDatabase, url: string, title: string) {
+  db.update(urls).set({ title }).where(eq(urls.url, url)).run();
+}
+
 export function getUrl(db: AppDatabase, url: string) {
   return db.select().from(urls).where(eq(urls.url, url)).get();
 }

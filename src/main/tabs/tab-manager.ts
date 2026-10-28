@@ -3,7 +3,7 @@ import { WebContentsView } from "electron";
 
 import type { Tab, TabsSnapshot, ViewBounds } from "../../shared/ipc";
 import type { AppDatabase } from "../db/database";
-import { recordVisit } from "../db/history";
+import { recordVisit, setUrlTitle } from "../db/history";
 import { closeTab, createTab, listTabs, updateTab } from "../db/tabs";
 import { getBackgroundColor } from "../theme/background-color";
 import type { ThemeController } from "../theme/theme-controller";
@@ -95,6 +95,8 @@ export function createTabManager(db: AppDatabase, theme: ThemeController) {
 
     webContents.on("page-title-updated", (_event, title) => {
       updateTab(db, tab.id, { title });
+      const url = webContents.getURL();
+      if (isAllowedUrl(url)) setUrlTitle(db, url, title);
       emitChanged();
     });
 

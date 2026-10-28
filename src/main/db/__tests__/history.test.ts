@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getUrl, recordVisit } from "../history";
+import { getUrl, recordVisit, setUrlTitle } from "../history";
 import { urls, visits } from "../schema";
 import { createTestDatabase } from "./test-database";
 
@@ -28,5 +28,22 @@ describe("recordVisit", () => {
     db.delete(urls).run();
 
     expect(db.select().from(visits).all()).toHaveLength(0);
+  });
+});
+
+describe("setUrlTitle", () => {
+  it("updates the title of a recorded url without creating rows for unknown urls", () => {
+    const db = createTestDatabase();
+    recordVisit(db, { url: "https://a.test", title: "", visitedAt: 100 });
+
+    setUrlTitle(db, "https://a.test", "Loaded title");
+    setUrlTitle(db, "https://unknown.test", "Ghost");
+
+    expect(getUrl(db, "https://a.test")).toMatchObject({
+      title: "Loaded title",
+      visitCount: 1,
+      lastVisitAt: 100,
+    });
+    expect(db.select().from(urls).all()).toHaveLength(1);
   });
 });
