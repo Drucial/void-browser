@@ -35,7 +35,7 @@ export function TabList({
               isActive={tab.id === activeTabId}
               onClick={() => onSelectTab(tab.id)}
             >
-              {tab.title || tab.url}
+              <span>{tab.title || tab.url}</span>
             </SidebarMenuButton>
             <SidebarMenuAction
               aria-label={`Close ${tab.title || tab.url}`}
