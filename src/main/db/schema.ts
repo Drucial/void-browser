@@ -35,3 +35,8 @@ export const visits = sqliteTable(
     index("visits_url_id_visited_at_idx").on(table.urlId, table.visitedAt),
   ]
 );
+
+export const settings = sqliteTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+});
