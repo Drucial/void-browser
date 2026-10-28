@@ -22,6 +22,7 @@ const api: AppApi = {
   closeTab: (id) => invoke("tabs:close", id),
   activateTab: (id) => invoke("tabs:activate", id),
   navigateActiveTab: (url) => invoke("tabs:navigate", url),
+  searchHistory: (query) => invoke("history:search", query),
   getTheme: () => invoke("theme:get"),
   setTheme: (preference) => invoke("theme:set", preference),
   setViewBounds: (bounds) => send("view:set-bounds", bounds),

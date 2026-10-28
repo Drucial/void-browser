@@ -104,7 +104,7 @@ app.whenReady().then(() => {
     loadPage: (contents) => loadRendererEntry(contents, "overlay.html"),
     focusActiveTab: tabs.focusActive,
   });
-  registerIpcHandlers(tabs, theme, overlay);
+  registerIpcHandlers(tabs, theme, overlay, db);
   createWindow(tabs, theme, overlay);
 
   app.on("activate", () => {

@@ -2,7 +2,7 @@ import { useAppMutation } from "@/hooks/use-app-mutation";
 
 export function useTabActions() {
   const createTab = useAppMutation({
-    mutationFn: () => window.api.createTab(),
+    mutationFn: (url?: string) => window.api.createTab(url),
     errorMessage: "Could not open a new tab",
   });
   const closeTab = useAppMutation({

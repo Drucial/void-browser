@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, desc, eq, or, sql } from "drizzle-orm";
 
 import type { AppDatabase } from "./database";
 import { urls, visits } from "./schema";
@@ -28,6 +28,32 @@ export function recordVisit(db: AppDatabase, { url, title, visitedAt }: Visit) {
 /** Updates the title of an already-recorded url; does nothing for an unknown url. */
 export function setUrlTitle(db: AppDatabase, url: string, title: string) {
   db.update(urls).set({ title }).where(eq(urls.url, url)).run();
+}
+
+function containsPattern(term: string) {
+  return `%${term.replace(/[\\%_]/g, "\\$&")}%`;
+}
+
+function matchesTerm(term: string) {
+  const pattern = containsPattern(term);
+
+  return or(
+    sql`${urls.title} like ${pattern} escape '\\'`,
+    sql`${urls.url} like ${pattern} escape '\\'`
+  );
+}
+
+/** Returns up to `limit` urls, most recently visited first, whose title or url contains every whitespace-separated term of `query`; a blank query returns the most recent. */
+export function searchHistory(db: AppDatabase, query: string, limit: number) {
+  const terms = query.split(/\s+/).filter(Boolean);
+
+  return db
+    .select({ id: urls.id, url: urls.url, title: urls.title })
+    .from(urls)
+    .where(and(...terms.map(matchesTerm)))
+    .orderBy(desc(urls.lastVisitAt))
+    .limit(limit)
+    .all();
 }
 
 export function getUrl(db: AppDatabase, url: string) {

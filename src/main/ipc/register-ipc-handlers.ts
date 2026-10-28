@@ -2,11 +2,16 @@ import { ipcMain } from "electron";
 import { z } from "zod";
 
 import type { InvokeContract, SendContract } from "../../shared/ipc";
+import type { AppDatabase } from "../db/database";
+import { searchHistory } from "../db/history";
 import { themePreferenceSchema } from "../db/settings";
 import type { OverlayManager } from "../overlay/overlay-manager";
 import { normalizeUrl } from "../tabs/normalize-url";
 import type { TabManager } from "../tabs/tab-manager";
 import type { ThemeController } from "../theme/theme-controller";
+
+const RECENT_HISTORY_LIMIT = 10;
+const SEARCH_HISTORY_LIMIT = 30;
 
 const tabIdSchema = z.number().int().positive();
 
@@ -58,13 +63,21 @@ function listen<
 export function registerIpcHandlers(
   tabs: TabManager,
   theme: ThemeController,
-  overlay: OverlayManager
+  overlay: OverlayManager,
+  db: AppDatabase
 ) {
   handle("tabs:list", z.undefined(), () => tabs.getSnapshot());
   handle("tabs:create", urlSchema.optional(), (url) => tabs.create(url));
   handle("tabs:close", tabIdSchema, (id) => tabs.close(id));
   handle("tabs:activate", tabIdSchema, (id) => tabs.activate(id));
   handle("tabs:navigate", urlSchema, (url) => tabs.navigateActive(url));
+  handle("history:search", z.string().max(500), (query) =>
+    searchHistory(
+      db,
+      query,
+      query.trim() ? SEARCH_HISTORY_LIMIT : RECENT_HISTORY_LIMIT
+    )
+  );
   handle("theme:get", z.undefined(), () => theme.getState());
   handle("theme:set", themePreferenceSchema, (preference) =>
     theme.setPreference(preference)

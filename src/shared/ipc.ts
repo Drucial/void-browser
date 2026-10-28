@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import type { tabs } from "../main/db/schema";
+import type { tabs, urls } from "../main/db/schema";
 import type { ThemePreference } from "../main/db/settings";
 import type {
   boundsSchema,
@@ -9,6 +9,11 @@ import type {
 } from "../main/ipc/register-ipc-handlers";
 
 export type Tab = typeof tabs.$inferSelect;
+
+export type HistoryEntry = Pick<
+  typeof urls.$inferSelect,
+  "id" | "url" | "title"
+>;
 
 export type TabsSnapshot = {
   tabs: Tab[];
@@ -32,6 +37,7 @@ export type InvokeContract = {
   "tabs:close": { input: number; output: void };
   "tabs:activate": { input: number; output: void };
   "tabs:navigate": { input: string; output: void };
+  "history:search": { input: string; output: HistoryEntry[] };
   "theme:get": { input: undefined; output: ThemeState };
   "theme:set": { input: ThemePreference; output: void };
 };
@@ -48,6 +54,7 @@ export type AppApi = {
   closeTab: (id: number) => Promise<void>;
   activateTab: (id: number) => Promise<void>;
   navigateActiveTab: (url: string) => Promise<void>;
+  searchHistory: (query: string) => Promise<HistoryEntry[]>;
   getTheme: () => Promise<ThemeState>;
   setTheme: (preference: ThemePreference) => Promise<void>;
   setViewBounds: (bounds: ViewBounds) => void;

@@ -47,6 +47,7 @@ function installApi() {
       return Promise.resolve();
     },
     navigateActiveTab,
+    searchHistory: () => Promise.resolve([]),
     getTheme: () => Promise.resolve({ preference: "system", isDark: false }),
     setTheme: () => Promise.resolve(),
     setViewBounds: () => {},
