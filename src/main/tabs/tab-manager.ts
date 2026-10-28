@@ -30,6 +30,10 @@ export function createTabManager(db: AppDatabase) {
     return { tabs: listTabs(db), activeId };
   }
 
+  function getActiveView() {
+    return activeId === null ? undefined : views.get(activeId);
+  }
+
   function showActiveView() {
     if (!window) return;
 
@@ -37,7 +41,7 @@ export function createTabManager(db: AppDatabase) {
       if (id !== activeId) window.contentView.removeChildView(view);
     }
 
-    const active = activeId === null ? undefined : views.get(activeId);
+    const active = getActiveView();
     if (!active) return;
 
     window.contentView.addChildView(active);
@@ -195,13 +199,13 @@ export function createTabManager(db: AppDatabase) {
     },
 
     navigateActive(url: string) {
-      const view = activeId === null ? undefined : views.get(activeId);
+      const view = getActiveView();
       if (view) loadUrl(view, url);
     },
 
     setBounds(next: ViewBounds) {
       bounds = next;
-      const view = activeId === null ? undefined : views.get(activeId);
+      const view = getActiveView();
       view?.setBounds(bounds);
     },
   };
