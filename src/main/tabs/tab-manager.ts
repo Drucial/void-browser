@@ -5,6 +5,8 @@ import type { Tab, TabsSnapshot, ViewBounds } from "../../shared/ipc";
 import type { AppDatabase } from "../db/database";
 import { recordVisit } from "../db/history";
 import { closeTab, createTab, listTabs, updateTab } from "../db/tabs";
+import { getBackgroundColor } from "../theme/background-color";
+import type { ThemeController } from "../theme/theme-controller";
 import { pickActiveAfterClose } from "./active-tab";
 import { isAllowedUrl, normalizeUrl } from "./normalize-url";
 
@@ -14,12 +16,18 @@ const HIDDEN_BOUNDS: ViewBounds = { x: 0, y: 0, width: 0, height: 0 };
 export type TabManager = ReturnType<typeof createTabManager>;
 
 /** Owns the tab views, the active tab and tab persistence for one window at a time. */
-export function createTabManager(db: AppDatabase) {
+export function createTabManager(db: AppDatabase, theme: ThemeController) {
   const views = new Map<number, WebContentsView>();
   let window: BrowserWindow | null = null;
   let activeId: number | null = null;
   let bounds: ViewBounds = HIDDEN_BOUNDS;
   const stackListeners = new Set<() => void>();
+
+  theme.onChanged((state) => {
+    for (const view of views.values()) {
+      view.setBackgroundColor(getBackgroundColor(state.isDark));
+    }
+  });
 
   function emitChanged() {
     if (window && !window.isDestroyed()) {
@@ -107,6 +115,7 @@ export function createTabManager(db: AppDatabase) {
       },
     });
 
+    view.setBackgroundColor(getBackgroundColor(theme.getState().isDark));
     views.set(tab.id, view);
     trackNavigation(tab, view);
     const url = normalizeUrl(tab.url);

@@ -59,7 +59,7 @@ export function BrowserShell() {
             />
           </form>
         </header>
-        <div ref={viewBoundsRef} className="flex-1" />
+        <div ref={viewBoundsRef} className="bg-background flex-1" />
       </SidebarInset>
     </SidebarProvider>
   );

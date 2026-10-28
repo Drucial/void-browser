@@ -12,15 +12,9 @@ import { cleanUserAgent } from "./tabs/clean-user-agent";
 import { withColorSchemeHint } from "./tabs/color-scheme-hint";
 import type { TabManager } from "./tabs/tab-manager";
 import { createTabManager } from "./tabs/tab-manager";
+import { getBackgroundColor } from "./theme/background-color";
 import type { ThemeController } from "./theme/theme-controller";
 import { createThemeController } from "./theme/theme-controller";
-
-const LIGHT_BACKGROUND = "#ffffff"; // must mirror --background in globals.css (oklch(1 0 0))
-const DARK_BACKGROUND = "#0a0a0a"; // must mirror .dark --background in globals.css (oklch(0.145 0 0))
-
-function getBackgroundColor(isDark: boolean) {
-  return isDark ? DARK_BACKGROUND : LIGHT_BACKGROUND;
-}
 
 function loadRendererEntry(contents: WebContents, entry: string) {
   const rendererUrl = process.env["ELECTRON_RENDERER_URL"];
@@ -105,7 +99,7 @@ app.whenReady().then(() => {
   sendColorSchemeHint();
   const db = openDatabase();
   const theme = createThemeController(db);
-  const tabs = createTabManager(db);
+  const tabs = createTabManager(db, theme);
   const overlay = createOverlayManager({
     loadPage: (contents) => loadRendererEntry(contents, "overlay.html"),
     focusActiveTab: tabs.focusActive,
