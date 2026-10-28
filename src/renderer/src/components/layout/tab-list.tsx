@@ -1,20 +1,30 @@
+import type { Tab } from "@shared/ipc";
+import { PlusIcon, XIcon } from "lucide-react";
+
 import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import type { SampleTab } from "./constants/sample-tabs";
-
 type TabListProps = {
-  tabs: SampleTab[];
-  activeTabId: string;
-  onSelectTab: (tabId: string) => void;
+  tabs: Tab[];
+  activeTabId: number | null;
+  onSelectTab: (tabId: number) => void;
+  onCloseTab: (tabId: number) => void;
+  onCreateTab: () => void;
 };
 
-export function TabList({ tabs, activeTabId, onSelectTab }: TabListProps) {
+export function TabList({
+  tabs,
+  activeTabId,
+  onSelectTab,
+  onCloseTab,
+  onCreateTab,
+}: TabListProps) {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Tabs</SidebarGroupLabel>
@@ -25,10 +35,22 @@ export function TabList({ tabs, activeTabId, onSelectTab }: TabListProps) {
               isActive={tab.id === activeTabId}
               onClick={() => onSelectTab(tab.id)}
             >
-              {tab.title}
+              {tab.title || tab.url}
             </SidebarMenuButton>
+            <SidebarMenuAction
+              aria-label={`Close ${tab.title || tab.url}`}
+              onClick={() => onCloseTab(tab.id)}
+            >
+              <XIcon />
+            </SidebarMenuAction>
           </SidebarMenuItem>
         ))}
+        <SidebarMenuItem>
+          <SidebarMenuButton onClick={onCreateTab}>
+            <PlusIcon />
+            New tab
+          </SidebarMenuButton>
+        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
   );

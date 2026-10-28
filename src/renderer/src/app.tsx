@@ -1,10 +1,10 @@
 import { BrowserShell } from "@/components/layout/browser-shell";
-import { ThemeProvider } from "@/components/layout/theme-provider";
+import { Providers } from "@/components/layout/providers";
 
 export function App() {
   return (
-    <ThemeProvider>
+    <Providers>
       <BrowserShell />
-    </ThemeProvider>
+    </Providers>
   );
 }
