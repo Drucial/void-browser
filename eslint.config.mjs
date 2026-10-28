@@ -139,7 +139,7 @@ export default [
     },
   },
   {
-    files: ["src/main/**", "src/preload/**", "*.config.*"],
+    files: ["src/main/**", "src/preload/**"],
     languageOptions: {
       globals: {
         ...globals.node,
