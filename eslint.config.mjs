@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import { plugin as shadcn } from "@shadcn/lint";
 import stylistic from "@stylistic/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier";
 import pluginReact from "eslint-plugin-react";
@@ -125,6 +126,14 @@ export default [
   },
   reactYouMightNotNeedAnEffect.configs.strict,
   {
+    files: ["src/renderer/**/*.{ts,tsx}"],
+    ignores: ["src/renderer/src/components/ui/**"],
+    plugins: { shadcn },
+    rules: {
+      "shadcn/no-arbitrary-values": "error",
+    },
+  },
+  {
     files: ["src/main/**", "src/preload/**", "*.config.*"],
     languageOptions: {
       globals: {
@@ -136,6 +145,7 @@ export default [
     files: ["src/renderer/src/components/ui/**"],
     rules: {
       "react/jsx-sort-props": "off",
+      "react-hooks/purity": "off",
     },
   },
 ];
