@@ -18,6 +18,7 @@
     "typecheck": "pnpm typecheck:node && pnpm typecheck:web",
     "test": "vitest",
     "test:run": "vitest run",
+    "db:generate": "drizzle-kit generate",
     "fix": "pnpm lint:fix && pnpm format",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck"
   },
