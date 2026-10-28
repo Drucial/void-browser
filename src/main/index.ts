@@ -1,15 +1,19 @@
 import { join } from "node:path";
 
 import Database from "better-sqlite3";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, nativeTheme } from "electron";
 
 import { openMigratedDatabase } from "./db/database";
+import { registerIpcHandlers } from "./ipc/register-ipc-handlers";
+import type { TabManager } from "./tabs/tab-manager";
+import { createTabManager } from "./tabs/tab-manager";
 
-function createWindow() {
+function createWindow(tabs: TabManager) {
   const window = new BrowserWindow({
     width: 1200,
     height: 800,
     show: false,
+    backgroundColor: nativeTheme.shouldUseDarkColors ? "#0a0a0a" : "#ffffff",
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
@@ -20,6 +24,8 @@ function createWindow() {
   });
 
   window.on("ready-to-show", () => window.show());
+  window.on("closed", () => tabs.dispose());
+  tabs.restore(window);
 
   const rendererUrl = process.env["ELECTRON_RENDERER_URL"];
 
@@ -38,11 +44,12 @@ function openDatabase() {
 }
 
 app.whenReady().then(() => {
-  openDatabase();
-  createWindow();
+  const tabs = createTabManager(openDatabase());
+  registerIpcHandlers(tabs);
+  createWindow(tabs);
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) createWindow(tabs);
   });
 });
 
