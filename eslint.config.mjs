@@ -145,6 +145,9 @@ export default [
         ...globals.node,
       },
     },
+    rules: {
+      "no-restricted-imports": "off",
+    },
   },
   {
     files: ["src/renderer/src/components/ui/**"],
