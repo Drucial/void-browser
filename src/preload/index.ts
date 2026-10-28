@@ -22,12 +22,20 @@ const api: AppApi = {
   closeTab: (id) => invoke("tabs:close", id),
   activateTab: (id) => invoke("tabs:activate", id),
   navigateActiveTab: (url) => invoke("tabs:navigate", url),
+  getTheme: () => invoke("theme:get"),
+  setTheme: (preference) => invoke("theme:set", preference),
   setViewBounds: (bounds) => send("view:set-bounds", bounds),
   onTabsChanged: (listener) => {
     const handle = () => listener();
     ipcRenderer.on("tabs:changed", handle);
 
     return () => ipcRenderer.removeListener("tabs:changed", handle);
+  },
+  onThemeChanged: (listener) => {
+    const handle = () => listener();
+    ipcRenderer.on("theme:changed", handle);
+
+    return () => ipcRenderer.removeListener("theme:changed", handle);
   },
 };
 

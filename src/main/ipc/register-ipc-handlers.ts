@@ -2,8 +2,10 @@ import { ipcMain } from "electron";
 import { z } from "zod";
 
 import type { InvokeContract, SendContract } from "../../shared/ipc";
+import { themePreferenceSchema } from "../db/settings";
 import { normalizeUrl } from "../tabs/normalize-url";
 import type { TabManager } from "../tabs/tab-manager";
+import type { ThemeController } from "../theme/theme-controller";
 
 const tabIdSchema = z.number().int().positive();
 
@@ -45,11 +47,15 @@ function listen<
   });
 }
 
-export function registerIpcHandlers(tabs: TabManager) {
+export function registerIpcHandlers(tabs: TabManager, theme: ThemeController) {
   handle("tabs:list", z.undefined(), () => tabs.getSnapshot());
   handle("tabs:create", urlSchema.optional(), (url) => tabs.create(url));
   handle("tabs:close", tabIdSchema, (id) => tabs.close(id));
   handle("tabs:activate", tabIdSchema, (id) => tabs.activate(id));
   handle("tabs:navigate", urlSchema, (url) => tabs.navigateActive(url));
+  handle("theme:get", z.undefined(), () => theme.getState());
+  handle("theme:set", themePreferenceSchema, (preference) =>
+    theme.setPreference(preference)
+  );
   listen("view:set-bounds", boundsSchema, (bounds) => tabs.setBounds(bounds));
 }

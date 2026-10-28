@@ -47,12 +47,15 @@ function installApi() {
       return Promise.resolve();
     },
     navigateActiveTab,
+    getTheme: () => Promise.resolve({ preference: "system", isDark: false }),
+    setTheme: () => Promise.resolve(),
     setViewBounds: () => {},
     onTabsChanged: (listener) => {
       listeners.add(listener);
 
       return () => listeners.delete(listener);
     },
+    onThemeChanged: () => () => {},
   };
 
   window.api = api;

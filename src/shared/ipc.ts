@@ -1,6 +1,7 @@
 import type { z } from "zod";
 
 import type { tabs } from "../main/db/schema";
+import type { ThemePreference } from "../main/db/settings";
 import type { boundsSchema } from "../main/ipc/register-ipc-handlers";
 
 export type Tab = typeof tabs.$inferSelect;
@@ -10,6 +11,13 @@ export type TabsSnapshot = {
   activeId: number | null;
 };
 
+export type ThemeState = {
+  preference: ThemePreference;
+  isDark: boolean;
+};
+
+export type { ThemePreference };
+
 export type ViewBounds = z.infer<typeof boundsSchema>;
 
 export type InvokeContract = {
@@ -18,6 +26,8 @@ export type InvokeContract = {
   "tabs:close": { input: number; output: void };
   "tabs:activate": { input: number; output: void };
   "tabs:navigate": { input: string; output: void };
+  "theme:get": { input: undefined; output: ThemeState };
+  "theme:set": { input: ThemePreference; output: void };
 };
 
 export type SendContract = {
@@ -30,6 +40,9 @@ export type AppApi = {
   closeTab: (id: number) => Promise<void>;
   activateTab: (id: number) => Promise<void>;
   navigateActiveTab: (url: string) => Promise<void>;
+  getTheme: () => Promise<ThemeState>;
+  setTheme: (preference: ThemePreference) => Promise<void>;
   setViewBounds: (bounds: ViewBounds) => void;
   onTabsChanged: (listener: () => void) => () => void;
+  onThemeChanged: (listener: () => void) => () => void;
 };
