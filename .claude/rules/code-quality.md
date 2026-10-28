@@ -74,7 +74,12 @@ Search before creating anything new.
 ## Tests
 
 - Tests ship in the same commit as the logic they verify.
-- Test logic and behavior. Skip purely presentational snapshots.
+- Keep tests reasonable and minimal. Never write vacuous tests.
+- Cover behavior that could actually break (a query returning wrong rows, a state transition, a validation boundary), not code restated or "it renders".
+- A few tests per behavior beats exhaustive cases.
+- No snapshot or render-only tests.
+- No `as`, `any`, or `!` in tests.
+- Don't test vendored `components/ui/`.
 - Co-locate tests in a `__tests__/` dir beside the file under test, named `<name>.test.ts(x)`.
 
 ## File size
