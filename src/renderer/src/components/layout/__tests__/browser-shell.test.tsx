@@ -50,6 +50,7 @@ function installApi() {
     getTheme: () => Promise.resolve({ preference: "system", isDark: false }),
     setTheme: () => Promise.resolve(),
     setViewBounds: () => {},
+    showToast: () => {},
     onTabsChanged: (listener) => {
       listeners.add(listener);
 

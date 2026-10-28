@@ -1,6 +1,5 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 type AppMutationOptions<Variables> = {
   mutationFn: (variables: Variables) => Promise<unknown>;
@@ -9,7 +8,7 @@ type AppMutationOptions<Variables> = {
   invalidates?: { queryKey: QueryKey }[];
 };
 
-/** Runs `mutationFn`, toasts the outcome and invalidates the queries given as factory results. */
+/** Runs `mutationFn`, reports the outcome as a toast and invalidates the queries given as factory results. */
 export function useAppMutation<Variables = void>({
   mutationFn,
   successMessage,
@@ -21,7 +20,8 @@ export function useAppMutation<Variables = void>({
   return useMutation({
     mutationFn,
     onSuccess: async () => {
-      if (successMessage) toast.success(successMessage);
+      if (successMessage)
+        window.api.showToast({ kind: "success", message: successMessage });
       await Promise.all(
         invalidates.map(({ queryKey }) =>
           queryClient.invalidateQueries({ queryKey })
@@ -29,7 +29,7 @@ export function useAppMutation<Variables = void>({
       );
     },
     onError: () => {
-      toast.error(errorMessage);
+      window.api.showToast({ kind: "error", message: errorMessage });
     },
   });
 }

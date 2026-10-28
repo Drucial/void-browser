@@ -51,6 +51,7 @@ export type AppApi = {
   getTheme: () => Promise<ThemeState>;
   setTheme: (preference: ThemePreference) => Promise<void>;
   setViewBounds: (bounds: ViewBounds) => void;
+  showToast: (toast: ToastRequest) => void;
   onTabsChanged: (listener: () => void) => () => void;
   onThemeChanged: (listener: () => void) => () => void;
 };

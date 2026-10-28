@@ -8,7 +8,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Toaster } from "@/components/ui/sonner";
 import { tabQueries } from "@/hooks/tabs/tabs.queries";
 import { useTabActions } from "@/hooks/tabs/use-tab-actions";
 import { useTabsChangedSync } from "@/hooks/tabs/use-tabs-changed-sync";
@@ -62,12 +61,6 @@ export function BrowserShell() {
         </header>
         <div ref={viewBoundsRef} className="flex-1" />
       </SidebarInset>
-      <Toaster
-        className="w-(--sidebar-width)!"
-        offset={{ bottom: "0.5rem", left: 0 }}
-        position="bottom-left"
-        toastOptions={{ className: "right-0 mx-2 w-auto!" }}
-      />
     </SidebarProvider>
   );
 }
