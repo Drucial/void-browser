@@ -7,9 +7,7 @@ describe("getContentHeight", () => {
     expect(getContentHeight([], 16)).toBe(0);
   });
 
-  it("reaches the lowest rect bottom, rounded up, plus padding", () => {
-    expect(getContentHeight([{ bottom: 68.7 }, { bottom: 120.1 }], 16)).toBe(
-      137
-    );
+  it("reaches the lowest bottom, rounded up, plus padding", () => {
+    expect(getContentHeight([68.7, 120.1], 16)).toBe(137);
   });
 });

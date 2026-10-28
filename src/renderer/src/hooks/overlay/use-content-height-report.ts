@@ -4,6 +4,12 @@ import { getContentHeight } from "@/components/overlay/utils/get-content-height"
 
 const TOAST_SELECTOR = "[data-sonner-toast]";
 
+function getLayoutBottom(toast: HTMLElement) {
+  const container = toast.offsetParent?.getBoundingClientRect().top ?? 0;
+
+  return container + toast.offsetTop + toast.offsetHeight;
+}
+
 /** Reports the toast stack's height to main whenever it changes, so main can fit the overlay view to it. */
 export function useContentHeightReport(padding: number) {
   useEffect(() => {
@@ -11,10 +17,10 @@ export function useContentHeightReport(padding: number) {
     let reported: number | null = null;
 
     const report = () => {
-      const rects = [...document.querySelectorAll(TOAST_SELECTOR)].map(
-        (toast) => toast.getBoundingClientRect()
-      );
-      const height = getContentHeight(rects, padding);
+      const bottoms = [
+        ...document.querySelectorAll<HTMLElement>(TOAST_SELECTOR),
+      ].map(getLayoutBottom);
+      const height = getContentHeight(bottoms, padding);
       if (height === reported) return;
 
       reported = height;
@@ -37,13 +43,11 @@ export function useContentHeightReport(padding: number) {
 
     const mutationObserver = new MutationObserver(observeToasts);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
-    document.addEventListener("transitionend", scheduleReport);
 
     return () => {
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       mutationObserver.disconnect();
-      document.removeEventListener("transitionend", scheduleReport);
     };
   }, [padding]);
 }
