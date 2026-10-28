@@ -1,10 +1,11 @@
 import { join } from "node:path";
 
 import Database from "better-sqlite3";
-import { app, BrowserWindow, nativeTheme } from "electron";
+import { app, BrowserWindow, nativeTheme, session } from "electron";
 
 import { openMigratedDatabase } from "./db/database";
 import { registerIpcHandlers } from "./ipc/register-ipc-handlers";
+import { cleanUserAgent } from "./tabs/clean-user-agent";
 import type { TabManager } from "./tabs/tab-manager";
 import { createTabManager } from "./tabs/tab-manager";
 
@@ -41,6 +42,13 @@ function createWindow(tabs: TabManager) {
   }
 }
 
+function cleanSessionUserAgent() {
+  const { defaultSession } = session;
+  defaultSession.setUserAgent(
+    cleanUserAgent(defaultSession.getUserAgent(), app.getName())
+  );
+}
+
 function openDatabase() {
   return openMigratedDatabase(
     new Database(join(app.getPath("userData"), "void.db")),
@@ -49,6 +57,7 @@ function openDatabase() {
 }
 
 app.whenReady().then(() => {
+  cleanSessionUserAgent();
   const tabs = createTabManager(openDatabase());
   registerIpcHandlers(tabs);
   createWindow(tabs);
