@@ -15,7 +15,7 @@ const urlSchema = z.string().transform((value, ctx) => {
   return url ?? z.NEVER;
 });
 
-const boundsSchema = z.object({
+export const boundsSchema = z.object({
   x: z.number().int(),
   y: z.number().int(),
   width: z.number().int().nonnegative(),

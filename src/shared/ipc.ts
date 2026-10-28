@@ -1,21 +1,16 @@
-export type Tab = {
-  id: number;
-  url: string;
-  title: string;
-  position: number;
-};
+import type { z } from "zod";
+
+import type { tabs } from "../main/db/schema";
+import type { boundsSchema } from "../main/ipc/register-ipc-handlers";
+
+export type Tab = typeof tabs.$inferSelect;
 
 export type TabsSnapshot = {
   tabs: Tab[];
   activeId: number | null;
 };
 
-export type ViewBounds = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
+export type ViewBounds = z.infer<typeof boundsSchema>;
 
 export type InvokeContract = {
   "tabs:list": { input: undefined; output: TabsSnapshot };
