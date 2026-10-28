@@ -3,4 +3,5 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 interface Window {
   api: import("@shared/ipc").AppApi;
+  overlayApi: import("@shared/ipc").OverlayApi;
 }

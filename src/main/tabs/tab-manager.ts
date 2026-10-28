@@ -19,6 +19,7 @@ export function createTabManager(db: AppDatabase) {
   let window: BrowserWindow | null = null;
   let activeId: number | null = null;
   let bounds: ViewBounds = HIDDEN_BOUNDS;
+  const stackListeners = new Set<() => void>();
 
   function emitChanged() {
     if (window && !window.isDestroyed()) {
@@ -46,6 +47,7 @@ export function createTabManager(db: AppDatabase) {
 
     window.contentView.addChildView(active);
     active.setBounds(bounds);
+    stackListeners.forEach((listener) => listener());
   }
 
   function loadUrl(view: WebContentsView, url: string) {
@@ -130,6 +132,18 @@ export function createTabManager(db: AppDatabase) {
 
   return {
     getSnapshot,
+
+    /** Runs `listener` after the active tab view is stacked into the window; returns an unsubscribe. */
+    onStackChanged(listener: () => void) {
+      stackListeners.add(listener);
+
+      return () => stackListeners.delete(listener);
+    },
+
+    /** Moves keyboard focus to the active tab's page. */
+    focusActive() {
+      getActiveView()?.webContents.focus();
+    },
 
     /** Loads the persisted tabs into `target`, creating a first tab if there are none, and activates the first. */
     restore(target: BrowserWindow) {

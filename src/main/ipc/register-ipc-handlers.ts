@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import type { InvokeContract, SendContract } from "../../shared/ipc";
 import { themePreferenceSchema } from "../db/settings";
+import type { OverlayManager } from "../overlay/overlay-manager";
 import { normalizeUrl } from "../tabs/normalize-url";
 import type { TabManager } from "../tabs/tab-manager";
 import type { ThemeController } from "../theme/theme-controller";
@@ -22,6 +23,13 @@ export const boundsSchema = z.object({
   y: z.number().int(),
   width: z.number().int().nonnegative(),
   height: z.number().int().nonnegative(),
+});
+
+export const contentHeightSchema = z.number().int().nonnegative();
+
+export const toastSchema = z.object({
+  kind: z.enum(["success", "error"]),
+  message: z.string().min(1).max(500),
 });
 
 function handle<
@@ -47,7 +55,11 @@ function listen<
   });
 }
 
-export function registerIpcHandlers(tabs: TabManager, theme: ThemeController) {
+export function registerIpcHandlers(
+  tabs: TabManager,
+  theme: ThemeController,
+  overlay: OverlayManager
+) {
   handle("tabs:list", z.undefined(), () => tabs.getSnapshot());
   handle("tabs:create", urlSchema.optional(), (url) => tabs.create(url));
   handle("tabs:close", tabIdSchema, (id) => tabs.close(id));
@@ -57,5 +69,12 @@ export function registerIpcHandlers(tabs: TabManager, theme: ThemeController) {
   handle("theme:set", themePreferenceSchema, (preference) =>
     theme.setPreference(preference)
   );
-  listen("view:set-bounds", boundsSchema, (bounds) => tabs.setBounds(bounds));
+  listen("view:set-bounds", boundsSchema, (bounds) => {
+    tabs.setBounds(bounds);
+    overlay.setPageBounds(bounds);
+  });
+  listen("overlay:toast", toastSchema, (toast) => overlay.showToast(toast));
+  listen("overlay:report-content-height", contentHeightSchema, (height) =>
+    overlay.reportContentHeight(height)
+  );
 }

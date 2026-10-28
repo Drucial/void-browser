@@ -2,7 +2,11 @@ import type { z } from "zod";
 
 import type { tabs } from "../main/db/schema";
 import type { ThemePreference } from "../main/db/settings";
-import type { boundsSchema } from "../main/ipc/register-ipc-handlers";
+import type {
+  boundsSchema,
+  contentHeightSchema,
+  toastSchema,
+} from "../main/ipc/register-ipc-handlers";
 
 export type Tab = typeof tabs.$inferSelect;
 
@@ -20,6 +24,8 @@ export type { ThemePreference };
 
 export type ViewBounds = z.infer<typeof boundsSchema>;
 
+export type ToastRequest = z.infer<typeof toastSchema>;
+
 export type InvokeContract = {
   "tabs:list": { input: undefined; output: TabsSnapshot };
   "tabs:create": { input: string | undefined; output: void };
@@ -32,6 +38,8 @@ export type InvokeContract = {
 
 export type SendContract = {
   "view:set-bounds": ViewBounds;
+  "overlay:toast": ToastRequest;
+  "overlay:report-content-height": z.infer<typeof contentHeightSchema>;
 };
 
 export type AppApi = {
@@ -45,4 +53,11 @@ export type AppApi = {
   setViewBounds: (bounds: ViewBounds) => void;
   onTabsChanged: (listener: () => void) => () => void;
   onThemeChanged: (listener: () => void) => () => void;
+};
+
+export type ThemeApi = Pick<AppApi, "getTheme" | "onThemeChanged">;
+
+export type OverlayApi = {
+  reportContentHeight: (height: number) => void;
+  onToast: (listener: (toast: ToastRequest) => void) => () => void;
 };
