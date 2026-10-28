@@ -1,24 +1,18 @@
 import type { ReactNode } from "react";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect } from "react";
 
-const DARK_QUERY = "(prefers-color-scheme: dark)";
+import { useQuery } from "@tanstack/react-query";
 
-function subscribe(onChange: () => void) {
-  const mql = window.matchMedia(DARK_QUERY);
-
-  mql.addEventListener("change", onChange);
-
-  return () => mql.removeEventListener("change", onChange);
-}
-
-function getIsDark() {
-  return window.matchMedia(DARK_QUERY).matches;
-}
+import { themeQueries } from "@/hooks/theme/theme.queries";
+import { useThemeChangedSync } from "@/hooks/theme/use-theme-changed-sync";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const isDark = useSyncExternalStore(subscribe, getIsDark);
+  useThemeChangedSync();
+  const { data } = useQuery(themeQueries.current());
+  const isDark = data?.isDark;
 
   useEffect(() => {
+    if (isDark === undefined) return;
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
 
