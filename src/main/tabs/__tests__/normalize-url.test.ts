@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeUrl } from "../normalize-url";
+import { isAllowedUrl, normalizeUrl } from "../normalize-url";
 
 describe("normalizeUrl", () => {
   it("defaults a missing scheme to https", () => {
@@ -16,5 +16,14 @@ describe("normalizeUrl", () => {
     expect(normalizeUrl("file:///etc/passwd")).toBeNull();
     expect(normalizeUrl("javascript:alert(1)")).toBeNull();
     expect(normalizeUrl("   ")).toBeNull();
+  });
+});
+
+describe("isAllowedUrl", () => {
+  it("allows http(s) and blocks file, custom and error-page schemes", () => {
+    expect(isAllowedUrl("https://example.com/")).toBe(true);
+    expect(isAllowedUrl("file:///etc/passwd")).toBe(false);
+    expect(isAllowedUrl("void://settings")).toBe(false);
+    expect(isAllowedUrl("chrome-error://chromewebdata/")).toBe(false);
   });
 });

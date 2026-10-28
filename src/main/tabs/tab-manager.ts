@@ -6,7 +6,7 @@ import type { AppDatabase } from "../db/database";
 import { recordVisit } from "../db/history";
 import { closeTab, createTab, listTabs, updateTab } from "../db/tabs";
 import { pickActiveAfterClose } from "./active-tab";
-import { normalizeUrl } from "./normalize-url";
+import { isAllowedUrl, normalizeUrl } from "./normalize-url";
 
 const DEFAULT_TAB_URL = "https://duckduckgo.com/";
 const HIDDEN_BOUNDS: ViewBounds = { x: 0, y: 0, width: 0, height: 0 };
@@ -51,9 +51,19 @@ export function createTabManager(db: AppDatabase) {
   function trackNavigation(tab: Tab, view: WebContentsView) {
     const { webContents } = view;
 
+    const blockDisallowedNavigation = (
+      event: { preventDefault: () => void },
+      url: string
+    ) => {
+      if (!isAllowedUrl(url)) event.preventDefault();
+    };
+
+    webContents.on("will-navigate", blockDisallowedNavigation);
+    webContents.on("will-redirect", blockDisallowedNavigation);
+
     webContents.on("did-navigate", (_event, url) => {
-      updateTab(db, tab.id, { url });
-      if (normalizeUrl(url)) {
+      if (isAllowedUrl(url)) {
+        updateTab(db, tab.id, { url });
         recordVisit(db, {
           url,
           title: webContents.getTitle(),
@@ -93,7 +103,8 @@ export function createTabManager(db: AppDatabase) {
 
     views.set(tab.id, view);
     trackNavigation(tab, view);
-    loadUrl(view, tab.url);
+    const url = normalizeUrl(tab.url);
+    if (url) loadUrl(view, url);
   }
 
   function open(url: string) {
