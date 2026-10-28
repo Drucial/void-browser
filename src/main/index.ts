@@ -1,6 +1,6 @@
 import { join } from "node:path";
 
-import { app, BrowserWindow, shell } from "electron";
+import { app, BrowserWindow } from "electron";
 
 function createWindow() {
   const window = new BrowserWindow({
@@ -17,12 +17,6 @@ function createWindow() {
   });
 
   window.on("ready-to-show", () => window.show());
-
-  window.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
-
-    return { action: "deny" };
-  });
 
   const rendererUrl = process.env["ELECTRON_RENDERER_URL"];
 
