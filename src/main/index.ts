@@ -1,11 +1,12 @@
 import { join } from "node:path";
 
 import Database from "better-sqlite3";
-import { app, BrowserWindow, session } from "electron";
+import { app, BrowserWindow, nativeTheme, session } from "electron";
 
 import { openMigratedDatabase } from "./db/database";
 import { registerIpcHandlers } from "./ipc/register-ipc-handlers";
 import { cleanUserAgent } from "./tabs/clean-user-agent";
+import { withColorSchemeHint } from "./tabs/color-scheme-hint";
 import type { TabManager } from "./tabs/tab-manager";
 import { createTabManager } from "./tabs/tab-manager";
 import type { ThemeController } from "./theme/theme-controller";
@@ -60,6 +61,23 @@ function cleanSessionUserAgent() {
   );
 }
 
+function sendColorSchemeHint() {
+  session.defaultSession.webRequest.onBeforeSendHeaders(
+    { urls: ["http://*/*", "https://*/*"] },
+    (details, callback) => {
+      callback({
+        requestHeaders:
+          details.resourceType === "mainFrame"
+            ? withColorSchemeHint(
+                details.requestHeaders,
+                nativeTheme.shouldUseDarkColors
+              )
+            : details.requestHeaders,
+      });
+    }
+  );
+}
+
 function openDatabase() {
   return openMigratedDatabase(
     new Database(join(app.getPath("userData"), "void.db")),
@@ -69,6 +87,7 @@ function openDatabase() {
 
 app.whenReady().then(() => {
   cleanSessionUserAgent();
+  sendColorSchemeHint();
   const db = openDatabase();
   const theme = createThemeController(db);
   const tabs = createTabManager(db);
