@@ -1,10 +1,9 @@
 import { join } from "node:path";
 
 import Database from "better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { app, BrowserWindow } from "electron";
 
-import { createDatabase } from "./db/database";
+import { openMigratedDatabase } from "./db/database";
 
 function createWindow() {
   const window = new BrowserWindow({
@@ -32,12 +31,10 @@ function createWindow() {
 }
 
 function openDatabase() {
-  const db = createDatabase(
-    new Database(join(app.getPath("userData"), "void.db"))
+  return openMigratedDatabase(
+    new Database(join(app.getPath("userData"), "void.db")),
+    join(app.getAppPath(), "drizzle")
   );
-  migrate(db, { migrationsFolder: join(app.getAppPath(), "drizzle") });
-
-  return db;
 }
 
 app.whenReady().then(() => {
