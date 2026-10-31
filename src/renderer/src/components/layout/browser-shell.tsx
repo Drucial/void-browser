@@ -33,7 +33,7 @@ export function BrowserShell() {
   return (
     <SidebarProvider>
       <SidebarToggleListener />
-      <Sidebar>
+      <Sidebar variant="inset">
         <SidebarHeader className="flex-row items-center">
           <SidebarMenu className="min-w-0 flex-1">
             <SidebarMenuItem>
@@ -63,7 +63,7 @@ export function BrowserShell() {
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <div ref={viewBoundsRef} className="bg-background flex-1" />
+        <div ref={viewBoundsRef} className="flex-1" />
       </SidebarInset>
     </SidebarProvider>
   );

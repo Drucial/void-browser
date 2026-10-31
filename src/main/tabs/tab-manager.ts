@@ -11,6 +11,7 @@ import { pickActiveAfterClose } from "./active-tab";
 import { isAllowedUrl, normalizeUrl } from "./normalize-url";
 
 const DEFAULT_TAB_URL = "https://duckduckgo.com/";
+const VIEW_BORDER_RADIUS = 14; // matches the shell's SidebarInset card (rounded-xl: 0.875rem)
 const HIDDEN_BOUNDS: ViewBounds = { x: 0, y: 0, width: 0, height: 0 };
 
 export type TabManager = ReturnType<typeof createTabManager>;
@@ -119,6 +120,7 @@ export function createTabManager(db: AppDatabase, theme: ThemeController) {
     });
 
     view.setBackgroundColor(getBackgroundColor(theme.getState().isDark));
+    view.setBorderRadius(VIEW_BORDER_RADIUS);
     views.set(tab.id, view);
     viewListeners.forEach((listener) => listener(view.webContents));
     trackNavigation(tab, view);
