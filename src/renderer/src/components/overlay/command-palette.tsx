@@ -33,18 +33,18 @@ export function CommandPalette({
   const [query, setQuery] = useState(initialQuery);
   const [highlightedUrl, setHighlightedUrl] = useState("");
   const [hasMovedHighlight, setHasMovedHighlight] = useState(false);
-  const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
   const isUntouched = query === initialQuery;
+  const debouncedQuery = useDebouncedValue(
+    isUntouched ? "" : query,
+    SEARCH_DEBOUNCE_MS
+  );
+  const typedText = query.trim();
   const { data } = useQuery({
-    ...historyQueries.search(isUntouched ? "" : debouncedQuery),
+    ...historyQueries.search(typedText ? debouncedQuery : ""),
     placeholderData: keepPreviousData,
   });
   const results = data?.entries ?? [];
-  const action =
-    !isUntouched && debouncedQuery === query
-      ? resolveAddressInput(query)
-      : null;
-  const typedText = query.trim();
+  const action = isUntouched ? null : resolveAddressInput(query);
   const navigate = useMutation({
     mutationFn: (request: NavigateRequest) =>
       window.overlayApi.navigate(request),
