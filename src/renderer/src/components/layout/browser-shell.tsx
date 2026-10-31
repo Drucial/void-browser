@@ -7,6 +7,7 @@ import {
 import { useTabsChangedSync } from "@/hooks/tabs/use-tabs-changed-sync";
 import { useViewBounds } from "@/hooks/tabs/use-view-bounds";
 
+import { HoverRail } from "./hover-rail";
 import { SidebarBody } from "./sidebar-body";
 import { SidebarToggleListener } from "./sidebar-toggle-listener";
 
@@ -17,6 +18,7 @@ export function BrowserShell() {
   return (
     <SidebarProvider>
       <SidebarToggleListener />
+      <HoverRail />
       <Sidebar variant="inset">
         <SidebarBody trigger={<SidebarTrigger />} />
       </Sidebar>

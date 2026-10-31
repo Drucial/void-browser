@@ -39,6 +39,7 @@ Feature component dirs co-locate their own `utils/` and `constants/` when needed
 ### Overlay
 
 - Anything that must render above the page (toasts, the command palette, menus, popovers, floating nav) lives in the overlay layer (`src/main/overlay` + the overlay renderer entry). Never add a per-feature native view or a webview for it.
+- Peek mode: while the sidebar is collapsed, hovering the shell's left-edge gutter (or the panel) asks main to slide a floating copy of the sidebar in from the overlay. Main owns the hover delays (`peek-hover.ts`) and hides the view only after the renderer confirms the slide-out. A modal ends the peek; a toast and the peek share the union of their bounds. The page view's bounds never change for it.
 
 ### IPC
 

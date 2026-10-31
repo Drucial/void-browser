@@ -39,6 +39,8 @@ function installApi() {
   let activeId = 1;
   const listeners = new Set<() => void>();
   const openPalette = vi.fn<AppApi["openPalette"]>();
+  const reportSidebarOpen = vi.fn<AppApi["reportSidebarOpen"]>();
+  const reportGutterHover = vi.fn<AppApi["reportGutterHover"]>();
   const toggleListeners = new Set<() => void>();
 
   const api: AppApi = {
@@ -57,8 +59,8 @@ function installApi() {
     setViewBounds: () => {},
     showToast: () => {},
     openPalette,
-    reportSidebarOpen: () => {},
-    reportGutterHover: () => {},
+    reportSidebarOpen,
+    reportGutterHover,
     onTabsChanged: (listener) => {
       listeners.add(listener);
 
@@ -76,6 +78,8 @@ function installApi() {
 
   return {
     openPalette,
+    reportSidebarOpen,
+    reportGutterHover,
     relaySidebarToggle: () => toggleListeners.forEach((listener) => listener()),
   };
 }
@@ -171,5 +175,24 @@ describe("BrowserShell", () => {
 
     act(() => relaySidebarToggle());
     expect(sidebar).toHaveAttribute("data-state", "expanded");
+  });
+
+  it("reports the sidebar state and offers the hover rail only while collapsed", async () => {
+    const { reportSidebarOpen, reportGutterHover } = installApi();
+    renderShell();
+    await screen.findByRole("button", { name: "Electron" });
+
+    expect(reportSidebarOpen).toHaveBeenLastCalledWith(true);
+    expect(document.querySelector("[data-slot='hover-rail']")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Toggle Sidebar" }));
+
+    expect(reportSidebarOpen).toHaveBeenLastCalledWith(false);
+    const rail = document.querySelector("[data-slot='hover-rail']");
+    expect(rail).not.toBeNull();
+
+    if (rail) fireEvent.pointerEnter(rail);
+
+    expect(reportGutterHover).toHaveBeenCalledWith(true);
   });
 });
