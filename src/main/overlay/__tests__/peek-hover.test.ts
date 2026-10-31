@@ -113,15 +113,34 @@ describe("peek hover", () => {
     expect(onHide).toHaveBeenCalledOnce();
   });
 
-  it("is not cut short by gutter reports that trail an exit", () => {
+  it("is not cut short by gutter or panel reports that trail an exit", () => {
     const { hover, onShow, onHide } = createHover();
     hover.exitedLeft();
     hover.setInside("gutter", true);
     hover.setInside("gutter", false);
-    vi.advanceTimersByTime(HOVER_HIDE_DELAY_MS);
+    hover.setInside("panel", true);
+    hover.setInside("panel", false);
+    vi.advanceTimersByTime(EXIT_IDLE_HIDE_MS - 1);
 
     expect(onShow).toHaveBeenCalledOnce();
     expect(onHide).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
+
+    expect(onHide).toHaveBeenCalledOnce();
+  });
+
+  it("hides at the exit delay when a trailing panel leave arrives without its enter", () => {
+    const { hover, onHide } = createHover();
+    hover.exitedLeft();
+    hover.setInside("panel", false);
+    vi.advanceTimersByTime(HOVER_HIDE_DELAY_MS);
+
+    expect(onHide).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(EXIT_IDLE_HIDE_MS);
+
+    expect(onHide).toHaveBeenCalledOnce();
   });
 
   it("ignores an exit report while the pointer is on the panel", () => {

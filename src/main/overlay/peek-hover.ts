@@ -20,7 +20,7 @@ export function createPeekHover({ onShow, onHide }: PeekHoverHandlers) {
       if (isInside) zonesInside.add(zone);
       else zonesInside.delete(zone);
 
-      if (isHeldByExit && zone === "gutter") return;
+      if (isHeldByExit) return;
 
       isHeldByExit = false;
       clearTimeout(timer);
@@ -31,7 +31,7 @@ export function createPeekHover({ onShow, onHide }: PeekHoverHandlers) {
           : undefined;
     },
 
-    /** Shows right away for a pointer that left the window across its left edge, then hides after `EXIT_IDLE_HIDE_MS` unless the pointer reaches the panel. */
+    /** Shows right away for a pointer that left the window across its left edge, then hides after `EXIT_IDLE_HIDE_MS` unless the pointer rests on the panel; hover reports in between are ignored. */
     exitedLeft() {
       zonesInside.delete("gutter");
       if (zonesInside.has("panel")) return;
@@ -41,7 +41,7 @@ export function createPeekHover({ onShow, onHide }: PeekHoverHandlers) {
       onShow();
       timer = setTimeout(() => {
         isHeldByExit = false;
-        onHide();
+        if (!zonesInside.has("panel")) onHide();
       }, EXIT_IDLE_HIDE_MS);
     },
 

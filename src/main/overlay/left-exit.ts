@@ -1,8 +1,10 @@
 import type { WebContents } from "electron";
 
-export const LEFT_EXIT_ZONE_PX = 96; // a fast flick can skip many pixels between the last sample and the exit
+export const LEFT_EXIT_ZONE_PX = 32; // the pointer outruns its own samples, so a flick ends a few pixels short of the edge
+export const LEFT_EXIT_MIN_SPEED_PX_PER_MS = 1; // slower than a flick is a deliberate approach, not an exit
+export const LEFT_EXIT_IDLE_MS = 80; // the page view reports no leave on a fast exit, so silence after a flick is the signal
 
-/** Feeds `contents` pointer moves and leaves, in window coordinates, to `detector`. */
+/** Feeds `contents` pointer moves, in window coordinates, to `detector`. */
 export function watchLeftExit(
   contents: WebContents,
   detector: LeftExitDetector
@@ -10,38 +12,45 @@ export function watchLeftExit(
   contents.on("before-mouse-event", (_event, mouse) => {
     if (mouse.type === "mouseMove")
       detector.move(mouse.globalX ?? mouse.x, mouse.globalY ?? mouse.y);
-    else if (mouse.type === "mouseLeave") detector.leave(mouse.x);
   });
 }
 
 export type LeftExitDetector = ReturnType<typeof createLeftExitDetector>;
 
-/** Calls `onExit` when the pointer leaves the window moving left from within the edge zone; the moves of every view in the window feed one history. */
+/** Calls `onExit` when a fast leftward move ends within the edge zone and no pointer event follows; the moves of every view in the window feed one history. */
 export function createLeftExitDetector(onExit: () => void) {
-  let last: { x: number; y: number } | undefined;
-  let previous: { x: number; y: number } | undefined;
+  let last: { x: number; y: number; at: number } | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  function isFlickToEdge(
+    from: { x: number; y: number; at: number },
+    to: { x: number; y: number; at: number }
+  ) {
+    const dx = to.x - from.x;
+    const isLeftward = dx < 0 && -dx >= Math.abs(to.y - from.y);
+    const speed = -dx / Math.max(to.at - from.at, 1);
+
+    return (
+      isLeftward &&
+      speed >= LEFT_EXIT_MIN_SPEED_PX_PER_MS &&
+      to.x <= LEFT_EXIT_ZONE_PX
+    );
+  }
 
   return {
     move(x: number, y: number) {
       if (last?.x === x && last.y === y) return;
 
-      previous = last;
-      last = { x, y };
-    },
+      const from = last;
+      const to = { x, y, at: Date.now() };
+      last = to;
+      clearTimeout(timer);
+      if (!from || !isFlickToEdge(from, to)) return;
 
-    /** `x` is the leaving view's own x; a negative one means the pointer crossed into the gutter, not out of the window. */
-    leave(x: number) {
-      if (x < 0) return;
-
-      const from = previous;
-      const to = last;
-      previous = undefined;
-      last = undefined;
-      if (!from || !to) return;
-
-      const dx = to.x - from.x;
-      const isLeftward = dx < 0 && -dx >= Math.abs(to.y - from.y);
-      if (isLeftward && to.x <= LEFT_EXIT_ZONE_PX) onExit();
+      timer = setTimeout(() => {
+        last = undefined;
+        onExit();
+      }, LEFT_EXIT_IDLE_MS);
     },
   };
 }
