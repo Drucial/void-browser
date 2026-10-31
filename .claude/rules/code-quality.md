@@ -37,7 +37,7 @@ Electron + React 19 + TypeScript (strict) + Tailwind v4. Hard conventions for th
 - The sandboxed preload can only `require` `electron` and a few core modules. It cannot import Node builtins such as `node:path`.
 - Never expose `ipcRenderer` or raw channel names to the renderer; expose named functions.
 - Validate every IPC payload at the main-process boundary with zod.
-- Renderer and main share types and pure, dependency-free modules in `src/shared` (no Node or Electron imports), never other runtime code.
+- Renderer and main share only what `src/shared` holds (see CLAUDE.md), never other runtime code.
 
 ## React discipline
 
@@ -70,7 +70,8 @@ Search before creating anything new.
 - **Never modify shared UI** (`components/ui/`, `components/shared/`) behavior or API without an explicit ask.
 - `components/ui/` is vendored from the shadcn CLI. Pass props and variants instead of restyling; no arbitrary Tailwind values (enforced by `shadcn/no-arbitrary-values`).
 - `src/renderer/src/components/ui/**` is vendored shadcn output the CLI re-fetches, so it is exempt from the no-comments rule, `react-hooks/purity`, and its other ui-scoped lint overrides in `eslint.config.mjs`. App code is not exempt.
-- `command.tsx`'s `CommandDialog` has a local `commandProps` pass-through to `Command`; re-check it after any `shadcn add command --overwrite`.
+- A local edit to a vendored `components/ui` primitive needs the user's explicit approval and is recorded here (primitive and change) so it can be re-checked after any `shadcn add ... --overwrite`.
+  - `command.tsx`: `CommandDialog` passes `commandProps` to `Command`.
 
 ## Tests
 

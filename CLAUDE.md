@@ -23,6 +23,7 @@ Speak plainly and concisely. No filler, no preamble, no restating the question. 
 
 - `src/main/` — Electron main process: windows, `WebContentsView` management, IPC handlers, database
 - `src/preload/` — sandboxed preload; the typed `contextBridge` API and nothing else
+- `src/shared/` — IPC contract types and pure, dependency-free modules shared by main, preload and renderer (no Node, Electron, React or zod imports); imported through the `@shared` alias
 - `src/renderer/src/` — React app, aliased as `@/`
   - `components/ui/` — vendored shadcn primitives
   - `components/layout/` — app shell: providers, sidebar, address bar
@@ -34,6 +35,10 @@ Speak plainly and concisely. No filler, no preamble, no restating the question. 
 Create top-level dirs only when the code is needed globally; otherwise co-locate under the feature that owns it. Hooks always live under `hooks/`.
 
 Feature component dirs co-locate their own `utils/` and `constants/` when needed.
+
+### Overlay
+
+- Anything that must render above the page (toasts, the command palette, menus, popovers, floating nav) lives in the overlay layer (`src/main/overlay` + the overlay renderer entry). Never add a per-feature native view or a webview for it.
 
 ### IPC
 
