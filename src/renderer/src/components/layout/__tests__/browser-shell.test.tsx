@@ -32,9 +32,7 @@ class StubResizeObserver implements ResizeObserver {
 function installApi() {
   let activeId = 1;
   const listeners = new Set<() => void>();
-  const navigateActiveTab = vi.fn<AppApi["navigateActiveTab"]>(() =>
-    Promise.resolve()
-  );
+  const openPalette = vi.fn<AppApi["openPalette"]>();
 
   const api: AppApi = {
     listTabs: () => Promise.resolve({ tabs: TABS, activeId }),
@@ -46,13 +44,13 @@ function installApi() {
 
       return Promise.resolve();
     },
-    navigateActiveTab,
+    navigateActiveTab: () => Promise.resolve(),
     searchHistory: () => Promise.resolve([]),
     getTheme: () => Promise.resolve({ preference: "system", isDark: false }),
     setTheme: () => Promise.resolve(),
     setViewBounds: () => {},
     showToast: () => {},
-    openPalette: () => {},
+    openPalette,
     onTabsChanged: (listener) => {
       listeners.add(listener);
 
@@ -63,7 +61,7 @@ function installApi() {
 
   window.api = api;
 
-  return { navigateActiveTab };
+  return { openPalette };
 }
 
 function renderShell() {
@@ -84,13 +82,13 @@ beforeAll(() => {
 });
 
 describe("BrowserShell", () => {
-  let navigateActiveTab: ReturnType<typeof installApi>["navigateActiveTab"];
+  let openPalette: ReturnType<typeof installApi>["openPalette"];
 
   beforeEach(() => {
-    ({ navigateActiveTab } = installApi());
+    ({ openPalette } = installApi());
   });
 
-  it("shows the active tab with its url in the address bar", async () => {
+  it("shows the active tab and its site in the address bar", async () => {
     renderShell();
 
     const activeButton = await screen.findByRole("button", {
@@ -98,7 +96,9 @@ describe("BrowserShell", () => {
     });
 
     expect(activeButton).toHaveAttribute("data-active", "true");
-    expect(screen.getByLabelText("Address bar")).toHaveValue(TABS[0]?.url);
+    expect(
+      screen.getByRole("button", { name: "Address bar" })
+    ).toHaveTextContent("www.electronjs.org");
   });
 
   it("follows main's active tab when a tab is selected", async () => {
@@ -106,24 +106,22 @@ describe("BrowserShell", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "shadcn/ui" }));
 
-    expect(
-      await screen.findByDisplayValue("https://ui.shadcn.com/")
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Address bar" })
+      ).toHaveTextContent("ui.shadcn.com")
+    );
     expect(screen.getByRole("button", { name: "shadcn/ui" })).toHaveAttribute(
       "data-active",
       "true"
     );
   });
 
-  it("sends the typed address to navigate the active tab", async () => {
+  it("opens the palette from the address bar", async () => {
     renderShell();
 
-    const input = await screen.findByLabelText("Address bar");
-    fireEvent.change(input, { target: { value: "example.com" } });
-    fireEvent.submit(input);
+    fireEvent.click(await screen.findByRole("button", { name: "Address bar" }));
 
-    await waitFor(() =>
-      expect(navigateActiveTab).toHaveBeenCalledWith("example.com")
-    );
+    expect(openPalette).toHaveBeenCalledOnce();
   });
 });

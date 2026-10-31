@@ -13,10 +13,6 @@ export function useTabActions() {
     mutationFn: (id: number) => window.api.activateTab(id),
     errorMessage: "Could not switch tabs",
   });
-  const navigateActiveTab = useAppMutation({
-    mutationFn: (url: string) => window.api.navigateActiveTab(url),
-    errorMessage: "That is not a valid web address",
-  });
 
-  return { createTab, closeTab, activateTab, navigateActiveTab };
+  return { createTab, closeTab, activateTab };
 }

@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { Input } from "@/components/ui/input";
 import {
   Sidebar,
   SidebarContent,
+  SidebarHeader,
   SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
@@ -12,14 +15,14 @@ import { tabQueries } from "@/hooks/tabs/tabs.queries";
 import { useTabActions } from "@/hooks/tabs/use-tab-actions";
 import { useTabsChangedSync } from "@/hooks/tabs/use-tabs-changed-sync";
 import { useViewBounds } from "@/hooks/tabs/use-view-bounds";
+import { getSiteLabel } from "@/utils/get-site-label";
 
 import { TabList } from "./tab-list";
 
 export function BrowserShell() {
   useTabsChangedSync();
   const { data } = useQuery(tabQueries.all());
-  const { createTab, closeTab, activateTab, navigateActiveTab } =
-    useTabActions();
+  const { createTab, closeTab, activateTab } = useTabActions();
   const viewBoundsRef = useViewBounds();
 
   const tabs = data?.tabs ?? [];
@@ -29,6 +32,23 @@ export function BrowserShell() {
   return (
     <SidebarProvider>
       <Sidebar>
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                aria-label="Address bar"
+                variant="outline"
+                onClick={() => window.api.openPalette()}
+              >
+                <span>
+                  {activeTab
+                    ? getSiteLabel(activeTab.url)
+                    : "Search or enter an address"}
+                </span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
         <SidebarContent>
           <TabList
             activeTabId={activeId}
@@ -42,22 +62,6 @@ export function BrowserShell() {
       <SidebarInset>
         <header className="flex items-center gap-2 p-2">
           <SidebarTrigger />
-          <form
-            className="flex-1"
-            onSubmit={(event) => {
-              event.preventDefault();
-              const address = new FormData(event.currentTarget).get("address");
-              if (typeof address === "string")
-                navigateActiveTab.mutate(address);
-            }}
-          >
-            <Input
-              key={`${activeId}:${activeTab?.url}`}
-              aria-label="Address bar"
-              defaultValue={activeTab?.url}
-              name="address"
-            />
-          </form>
         </header>
         <div ref={viewBoundsRef} className="bg-background flex-1" />
       </SidebarInset>
