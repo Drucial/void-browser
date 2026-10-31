@@ -1,7 +1,7 @@
 import type { PeekZone } from "../../shared/ipc";
 
-export const HOVER_SHOW_DELAY_MS = 100;
-export const HOVER_HIDE_DELAY_MS = 300;
+export const HOVER_SHOW_DELAY_MS = 280;
+export const HOVER_HIDE_DELAY_MS = 120;
 export const EXIT_SETTLE_MS = 50; // the overlay reports a stray panel enter and leave within ~6ms of an exit show, before the pointer has moved
 
 type PeekHoverHandlers = {

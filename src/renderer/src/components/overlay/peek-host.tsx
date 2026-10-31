@@ -21,8 +21,8 @@ export function PeekHost() {
         aria-label="Tabs"
         inert={!isOpen}
         className={cn(
-          "bg-background fixed top-0 bottom-2 left-2 w-64 overflow-hidden rounded-xl border shadow-xl transition-transform duration-200 ease-out",
-          isOpen ? "translate-x-0" : "-translate-x-80"
+          "bg-background transition-peek fixed top-0 bottom-2 left-2 w-64 overflow-hidden rounded-xl border shadow-xl",
+          isOpen ? "translate-x-0 opacity-100" : "-translate-x-80 opacity-0"
         )}
         onTransitionEnd={confirmExit}
       >

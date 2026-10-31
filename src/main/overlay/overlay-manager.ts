@@ -11,7 +11,7 @@ import { watchPaletteShortcut } from "./palette-shortcut";
 import { createPeekHover } from "./peek-hover";
 
 const TRANSPARENT = "#00000000";
-const PEEK_EXIT_TIMEOUT_MS = 400; // hides the view even if the renderer never confirms its 200ms slide-out
+const PEEK_EXIT_TIMEOUT_MS = 500; // hides the view even if the renderer never confirms its 280ms slide-out
 
 export type OverlayManager = ReturnType<typeof createOverlayManager>;
 
