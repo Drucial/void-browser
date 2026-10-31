@@ -12,7 +12,7 @@ import { pickActiveAfterClose } from "./active-tab";
 import { isAllowedUrl } from "./normalize-url";
 
 const DEFAULT_TAB_URL = "https://duckduckgo.com/";
-const VIEW_BORDER_RADIUS = 14; // matches the shell's SidebarInset card (rounded-xl: 0.875rem)
+const VIEW_BORDER_RADIUS = 13; // the SidebarInset card radius (rounded-xl, 14px) minus its 1px border
 const HIDDEN_BOUNDS: ViewBounds = { x: 0, y: 0, width: 0, height: 0 };
 
 export type TabManager = ReturnType<typeof createTabManager>;

@@ -63,7 +63,9 @@ export function BrowserShell() {
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <div ref={viewBoundsRef} className="flex-1" />
+        <div className="flex flex-1 rounded-xl border">
+          <div ref={viewBoundsRef} className="flex-1" />
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
