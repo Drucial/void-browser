@@ -70,6 +70,7 @@ Search before creating anything new.
 - **Never modify shared UI** (`components/ui/`, `components/shared/`) behavior or API without an explicit ask.
 - `components/ui/` is vendored from the shadcn CLI. Pass props and variants instead of restyling; no arbitrary Tailwind values (enforced by `shadcn/no-arbitrary-values`).
 - `src/renderer/src/components/ui/**` is vendored shadcn output the CLI re-fetches, so it is exempt from the no-comments rule, `react-hooks/purity`, and its other ui-scoped lint overrides in `eslint.config.mjs`. App code is not exempt.
+- `command.tsx`'s `CommandDialog` has a local `commandProps` pass-through to `Command`; re-check it after any `shadcn add command --overwrite`.
 
 ## Tests
 
