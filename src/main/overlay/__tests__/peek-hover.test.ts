@@ -167,3 +167,46 @@ describe("peek hover", () => {
     expect(onShow).not.toHaveBeenCalled();
   });
 });
+
+describe("peek hover while a button is held", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("does not show when the show timer fires with a button held, and shows a hold after release", () => {
+    const { hover, onShow } = createHover();
+    hover.setInside("gutter", true);
+    hover.setPressed(true);
+    vi.advanceTimersByTime(HOVER_SHOW_DELAY_MS * 2);
+
+    expect(onShow).not.toHaveBeenCalled();
+
+    hover.setPressed(false);
+    vi.advanceTimersByTime(HOVER_SHOW_DELAY_MS - 1);
+
+    expect(onShow).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
+
+    expect(onShow).toHaveBeenCalledOnce();
+  });
+
+  it("does not restart a deferred show after the pointer left the gutter", () => {
+    const { hover, onShow } = createHover();
+    hover.setInside("gutter", true);
+    hover.setPressed(true);
+    vi.advanceTimersByTime(HOVER_SHOW_DELAY_MS);
+    hover.setInside("gutter", false);
+    hover.setPressed(false);
+    vi.advanceTimersByTime(HOVER_SHOW_DELAY_MS * 2);
+
+    expect(onShow).not.toHaveBeenCalled();
+  });
+
+  it("ignores an exit while a button is held", () => {
+    const { hover, onShow } = createHover();
+    hover.setPressed(true);
+    hover.exitedLeft();
+
+    expect(onShow).not.toHaveBeenCalled();
+  });
+});

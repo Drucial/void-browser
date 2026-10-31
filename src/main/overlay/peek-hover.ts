@@ -15,7 +15,16 @@ export function createPeekHover({ onShow, onHide }: PeekHoverHandlers) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let isHeldByExit = false;
   let isSettling = false;
+  let isPressed = false;
+  let isShowDeferred = false;
   let settleTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function startShowTimer() {
+    return setTimeout(() => {
+      if (isPressed) isShowDeferred = true;
+      else onShow();
+    }, HOVER_SHOW_DELAY_MS);
+  }
 
   return {
     setInside(zone: PeekZone, isInside: boolean) {
@@ -26,9 +35,10 @@ export function createPeekHover({ onShow, onHide }: PeekHoverHandlers) {
         return;
 
       isHeldByExit = false;
+      isShowDeferred = false;
       clearTimeout(timer);
       timer = isInside
-        ? setTimeout(onShow, HOVER_SHOW_DELAY_MS)
+        ? startShowTimer()
         : zonesInside.size === 0
           ? setTimeout(onHide, HOVER_HIDE_DELAY_MS)
           : undefined;
@@ -37,7 +47,7 @@ export function createPeekHover({ onShow, onHide }: PeekHoverHandlers) {
     /** Shows right away for a pointer that left the window across its left edge and keeps the nav up until the pointer returns; hover reports before then are ignored, apart from a panel enter. */
     exitedLeft() {
       zonesInside.delete("gutter");
-      if (zonesInside.has("panel")) return;
+      if (zonesInside.has("panel") || isPressed) return;
 
       isHeldByExit = true;
       isSettling = true;
@@ -58,10 +68,20 @@ export function createPeekHover({ onShow, onHide }: PeekHoverHandlers) {
         timer = setTimeout(onHide, HOVER_HIDE_DELAY_MS);
     },
 
+    /** Holds back reveals while a mouse button is down, so drags and selections never open the nav; a reveal that came due meanwhile restarts on release. */
+    setPressed(nextIsPressed: boolean) {
+      isPressed = nextIsPressed;
+      if (isPressed || !isShowDeferred) return;
+
+      isShowDeferred = false;
+      if (zonesInside.has("gutter")) timer = startShowTimer();
+    },
+
     /** Forgets where the pointer is and cancels any pending request. */
     reset() {
       isHeldByExit = false;
       isSettling = false;
+      isShowDeferred = false;
       zonesInside.clear();
       clearTimeout(settleTimer);
       clearTimeout(timer);

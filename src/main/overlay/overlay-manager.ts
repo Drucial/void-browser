@@ -9,6 +9,7 @@ import { createLeftExitDetector, watchLeftExit } from "./left-exit";
 import { createOverlayState } from "./overlay-state";
 import { watchPaletteShortcut } from "./palette-shortcut";
 import { createPeekHover } from "./peek-hover";
+import { watchPressedButtons } from "./pressed-buttons";
 
 const TRANSPARENT = "#00000000";
 const PEEK_EXIT_TIMEOUT_MS = 500; // hides the view even if the renderer never confirms its 280ms slide-out
@@ -137,6 +138,7 @@ export function createOverlayManager({
         requestSidebarToggle,
         isPaletteClosed
       );
+      watchPressedButtons(view.webContents, hover.setPressed);
       loadPage(view.webContents);
       target.contentView.addChildView(view);
       target.on("resize", syncWindowSize);
@@ -198,9 +200,10 @@ export function createOverlayManager({
       hover.setInside(zone, isInside);
     },
 
-    /** Shows the floating nav when the pointer leaves the window across its left edge after moving through `contents`. */
-    watchPointerExit(contents: WebContents) {
+    /** Shows the floating nav when the pointer leaves the window across its left edge after moving through `contents`, and tracks its held mouse buttons. */
+    watchPointer(contents: WebContents) {
       watchLeftExit(contents, leftExit);
+      watchPressedButtons(contents, hover.setPressed);
     },
 
     /** Starts the slide-out right away, ignoring where the pointer is. */
