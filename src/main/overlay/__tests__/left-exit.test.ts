@@ -56,9 +56,31 @@ describe("left exit detector", () => {
     expect(onExit).not.toHaveBeenCalled();
   });
 
+  it("reports a very fast flick whose last sample is a step short of the edge", () => {
+    const { detector, onExit } = createDetector();
+    for (const x of [192.6, 168.3, 128.7, 85.1, 34.1]) {
+      detector.move(x, 550);
+      vi.advanceTimersByTime(MOUSE_SAMPLE_MS);
+    }
+    vi.advanceTimersByTime(LEFT_EXIT_IDLE_MS);
+
+    expect(onExit).toHaveBeenCalledOnce();
+  });
+
+  it("ignores a decelerating move that stops outside the zone", () => {
+    const { detector, onExit } = createDetector();
+    for (const x of [194.3, 145.1, 106.5, 78.7, 58.9, 46.6]) {
+      detector.move(x, 400);
+      vi.advanceTimersByTime(MOUSE_SAMPLE_MS);
+    }
+    vi.advanceTimersByTime(LEFT_EXIT_IDLE_MS * 5);
+
+    expect(onExit).not.toHaveBeenCalled();
+  });
+
   it("ignores a flick that stops outside the edge zone", () => {
     const { detector, onExit } = createDetector();
-    detector.move(600, 300);
+    detector.move(LEFT_EXIT_ZONE_PX + 150, 300);
     vi.advanceTimersByTime(8);
     detector.move(LEFT_EXIT_ZONE_PX + 100, 300);
     vi.advanceTimersByTime(LEFT_EXIT_IDLE_MS * 5);

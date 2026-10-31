@@ -18,7 +18,7 @@ export function watchLeftExit(
 
 export type LeftExitDetector = ReturnType<typeof createLeftExitDetector>;
 
-/** Calls `onExit` when a leftward move ends at the edge (fast within the zone, any speed within the band) and no pointer event follows; the moves of every view in the window feed one history. */
+/** Calls `onExit` when a leftward move ends at the edge (fast within the zone or one step of the edge, any speed within the band) and no pointer event follows; the moves of every view in the window feed one history. */
 export function createLeftExitDetector(onExit: () => void) {
   let last: { x: number; y: number; at: number } | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -34,7 +34,8 @@ export function createLeftExitDetector(onExit: () => void) {
     return (
       isLeftward &&
       (to.x <= LEFT_EXIT_EDGE_BAND_PX ||
-        (speed >= LEFT_EXIT_MIN_SPEED_PX_PER_MS && to.x <= LEFT_EXIT_ZONE_PX))
+        (speed >= LEFT_EXIT_MIN_SPEED_PX_PER_MS &&
+          to.x <= Math.max(LEFT_EXIT_ZONE_PX, -dx)))
     );
   }
 
