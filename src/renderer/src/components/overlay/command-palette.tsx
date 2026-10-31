@@ -46,6 +46,7 @@ export function CommandPalette({
   const {
     results,
     isShown: isListShown,
+    hasBody: hasListBody,
     hasNoMatches,
   } = getPaletteList({
     query,
@@ -93,25 +94,27 @@ export function CommandPalette({
       />
       {isListShown && (
         <>
-          <CommandList>
-            {hasNoMatches && <CommandEmpty>No matches</CommandEmpty>}
-            {results.map((entry) => (
-              <CommandItem
-                key={entry.id}
-                value={entry.url}
-                onSelect={() =>
-                  navigate.mutate({ url: entry.url, newTab: false })
-                }
-              >
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate">{entry.title || entry.url}</span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    {entry.url}
-                  </span>
-                </div>
-              </CommandItem>
-            ))}
-          </CommandList>
+          {hasListBody && (
+            <CommandList className="h-72">
+              {hasNoMatches && <CommandEmpty>No matches</CommandEmpty>}
+              {results.map((entry) => (
+                <CommandItem
+                  key={entry.id}
+                  value={entry.url}
+                  onSelect={() =>
+                    navigate.mutate({ url: entry.url, newTab: false })
+                  }
+                >
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate">{entry.title || entry.url}</span>
+                    <span className="text-muted-foreground truncate text-xs">
+                      {entry.url}
+                    </span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandList>
+          )}
           <div className="text-muted-foreground flex items-center gap-4 border-t px-3 py-2 text-xs">
             {PALETTE_KEY_HINTS.map(({ label, keys }) => (
               <span key={label} className="flex items-center gap-1">

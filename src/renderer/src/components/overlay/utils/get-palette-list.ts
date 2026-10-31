@@ -10,10 +10,11 @@ type PaletteListInput = {
 type PaletteList = {
   results: HistoryEntry[];
   isShown: boolean;
+  hasBody: boolean;
   hasNoMatches: boolean;
 };
 
-/** Hides the list while a prefilled query is untouched; reports no matches only after the user edits and the search settles empty. */
+/** Hides the list while a prefilled query is untouched; reports no matches only after the user edits and the search settles empty; `hasBody` is whether the list area has anything to hold. */
 export function getPaletteList({
   query,
   initialQuery,
@@ -24,12 +25,16 @@ export function getPaletteList({
   const hasEdited = query !== initialQuery;
 
   if (isPrefilledUntouched) {
-    return { results: [], isShown: false, hasNoMatches: false };
+    return { results: [], isShown: false, hasBody: false, hasNoMatches: false };
   }
+
+  const hasNoMatches = hasEdited && isSettled && results.length === 0;
+  const isLoading = hasEdited && !isSettled;
 
   return {
     results,
     isShown: true,
-    hasNoMatches: hasEdited && isSettled && results.length === 0,
+    hasBody: results.length > 0 || hasNoMatches || isLoading,
+    hasNoMatches,
   };
 }

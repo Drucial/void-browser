@@ -23,6 +23,7 @@ describe("getPaletteList", () => {
     expect(untouched).toEqual({
       results: [],
       isShown: false,
+      hasBody: false,
       hasNoMatches: false,
     });
     expect(edited.results).toEqual(RESULTS);
@@ -56,5 +57,23 @@ describe("getPaletteList", () => {
     expect(getPaletteList({ ...base, isSettled: true }).hasNoMatches).toBe(
       true
     );
+  });
+
+  it("holds a body for results, no matches, or a pending edit, but not an empty recent list", () => {
+    const edited = { query: "zzz", initialQuery: "", results: [] };
+
+    expect(
+      getPaletteList({ ...edited, results: RESULTS, isSettled: true }).hasBody
+    ).toBe(true);
+    expect(getPaletteList({ ...edited, isSettled: true }).hasBody).toBe(true);
+    expect(getPaletteList({ ...edited, isSettled: false }).hasBody).toBe(true);
+    expect(
+      getPaletteList({
+        query: "",
+        initialQuery: "",
+        results: [],
+        isSettled: false,
+      }).hasBody
+    ).toBe(false);
   });
 });
