@@ -2,6 +2,7 @@ import type { WebContents } from "electron";
 
 export const LEFT_EXIT_ZONE_PX = 32; // the pointer outruns its own samples, so a flick ends a few pixels short of the edge
 export const LEFT_EXIT_MIN_SPEED_PX_PER_MS = 1; // slower than a flick is a deliberate approach, not an exit
+export const LEFT_EXIT_EDGE_BAND_PX = 12; // a decelerating exit slows to a crawl at the edge, so any leftward move ending this close counts
 export const LEFT_EXIT_IDLE_MS = 80; // the page view reports no leave on a fast exit, so silence after a flick is the signal
 
 /** Feeds `contents` pointer moves, in window coordinates, to `detector`. */
@@ -17,12 +18,12 @@ export function watchLeftExit(
 
 export type LeftExitDetector = ReturnType<typeof createLeftExitDetector>;
 
-/** Calls `onExit` when a fast leftward move ends within the edge zone and no pointer event follows; the moves of every view in the window feed one history. */
+/** Calls `onExit` when a leftward move ends at the edge (fast within the zone, any speed within the band) and no pointer event follows; the moves of every view in the window feed one history. */
 export function createLeftExitDetector(onExit: () => void) {
   let last: { x: number; y: number; at: number } | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
 
-  function isFlickToEdge(
+  function isLeftwardToEdge(
     from: { x: number; y: number; at: number },
     to: { x: number; y: number; at: number }
   ) {
@@ -32,8 +33,8 @@ export function createLeftExitDetector(onExit: () => void) {
 
     return (
       isLeftward &&
-      speed >= LEFT_EXIT_MIN_SPEED_PX_PER_MS &&
-      to.x <= LEFT_EXIT_ZONE_PX
+      (to.x <= LEFT_EXIT_EDGE_BAND_PX ||
+        (speed >= LEFT_EXIT_MIN_SPEED_PX_PER_MS && to.x <= LEFT_EXIT_ZONE_PX))
     );
   }
 
@@ -45,7 +46,7 @@ export function createLeftExitDetector(onExit: () => void) {
       const to = { x, y, at: Date.now() };
       last = to;
       clearTimeout(timer);
-      if (!from || !isFlickToEdge(from, to)) return;
+      if (!from || !isLeftwardToEdge(from, to)) return;
 
       timer = setTimeout(() => {
         last = undefined;

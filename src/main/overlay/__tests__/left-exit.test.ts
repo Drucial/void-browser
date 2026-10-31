@@ -2,9 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   createLeftExitDetector,
+  LEFT_EXIT_EDGE_BAND_PX,
   LEFT_EXIT_IDLE_MS,
   LEFT_EXIT_ZONE_PX,
 } from "../left-exit";
+
+const MOUSE_SAMPLE_MS = 7;
 
 function createDetector() {
   const onExit = vi.fn();
@@ -30,13 +33,26 @@ describe("left exit detector", () => {
     expect(onExit).toHaveBeenCalledOnce();
   });
 
-  it("ignores a slow approach that pauses in the edge zone", () => {
+  it("reports a slow decelerating exit that ends in the edge band", () => {
     const { detector, onExit } = createDetector();
-    detector.move(LEFT_EXIT_ZONE_PX + 20, 300);
-    vi.advanceTimersByTime(100);
-    detector.move(LEFT_EXIT_ZONE_PX - 5, 300);
+    for (const x of [60.9, 58.3, 53.8, 51.2, 49.4, 44.9, 20, 11.3, 8.8, 5.5]) {
+      detector.move(x, 345);
+      vi.advanceTimersByTime(MOUSE_SAMPLE_MS);
+    }
+    vi.advanceTimersByTime(LEFT_EXIT_IDLE_MS);
+
+    expect(onExit).toHaveBeenCalledOnce();
+  });
+
+  it("ignores a slow approach that pauses in the edge zone outside the band", () => {
+    const { detector, onExit } = createDetector();
+    for (const x of [44.9, 42.3, 36, 30, 26, 22, 20]) {
+      detector.move(x, 345);
+      vi.advanceTimersByTime(MOUSE_SAMPLE_MS);
+    }
     vi.advanceTimersByTime(LEFT_EXIT_IDLE_MS * 5);
 
+    expect(LEFT_EXIT_EDGE_BAND_PX).toBeLessThan(20);
     expect(onExit).not.toHaveBeenCalled();
   });
 
