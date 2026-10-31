@@ -15,6 +15,7 @@ describe("resolveSubmission", () => {
         results: RESULTS,
         highlightedUrl: "https://example.org/",
         isNewTab: true,
+        isKeepingPrefill: false,
       })
     ).toEqual({ url: "https://example.org/", newTab: true });
   });
@@ -26,6 +27,7 @@ describe("resolveSubmission", () => {
         results: RESULTS,
         highlightedUrl: "",
         isNewTab: false,
+        isKeepingPrefill: false,
       })
     ).toEqual({ url: "https://example.com/", newTab: false });
   });
@@ -37,6 +39,7 @@ describe("resolveSubmission", () => {
         results: [],
         highlightedUrl: "https://example.com/",
         isNewTab: false,
+        isKeepingPrefill: false,
       })
     ).toEqual({ url: "nowhere.dev", newTab: false });
   });
@@ -48,7 +51,20 @@ describe("resolveSubmission", () => {
         results: [],
         highlightedUrl: "",
         isNewTab: false,
+        isKeepingPrefill: false,
       })
     ).toBeNull();
+  });
+
+  it("submits an untouched prefill instead of a listed result", () => {
+    expect(
+      resolveSubmission({
+        query: "https://current.test/",
+        results: RESULTS,
+        highlightedUrl: "https://example.com/",
+        isNewTab: false,
+        isKeepingPrefill: true,
+      })
+    ).toEqual({ url: "https://current.test/", newTab: false });
   });
 });
