@@ -6,12 +6,12 @@ const HISTORY_SEARCH_MAX_LENGTH = 500; // main rejects longer queries
 
 export const historyQueries = {
   search: (query: string) => {
-    const normalized = query.trim().toLowerCase();
+    const trimmed = query.trim();
 
     return queryOptions({
-      queryKey: [...HISTORY_QUERY_KEY, "search", normalized],
-      queryFn: () => window.api.searchHistory(normalized),
-      enabled: normalized.length <= HISTORY_SEARCH_MAX_LENGTH,
+      queryKey: [...HISTORY_QUERY_KEY, "search", trimmed],
+      queryFn: () => window.api.searchHistory(trimmed),
+      enabled: trimmed.length <= HISTORY_SEARCH_MAX_LENGTH,
       staleTime: 30_000,
     });
   },

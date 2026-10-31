@@ -6,7 +6,7 @@ import type { AppDatabase } from "../db/database";
 import { searchHistory } from "../db/history";
 import { themePreferenceSchema } from "../db/settings";
 import type { OverlayManager } from "../overlay/overlay-manager";
-import { normalizeUrl } from "../tabs/normalize-url";
+import { resolveAddressInput } from "../tabs/normalize-url";
 import type { TabManager } from "../tabs/tab-manager";
 import type { ThemeController } from "../theme/theme-controller";
 
@@ -16,7 +16,7 @@ const SEARCH_HISTORY_LIMIT = 30;
 const tabIdSchema = z.number().int().positive();
 
 const urlSchema = z.string().transform((value, ctx) => {
-  const url = normalizeUrl(value);
+  const url = resolveAddressInput(value)?.url;
   if (!url)
     ctx.issues.push({ code: "custom", message: "Invalid URL", input: value });
 
@@ -81,13 +81,14 @@ export function registerIpcHandlers(
     if (newTab) tabs.create(url);
     else tabs.navigateActive(url);
   });
-  handle("history:search", z.string().max(500), (query) =>
-    searchHistory(
+  handle("history:search", z.string().max(500), (query) => ({
+    action: resolveAddressInput(query),
+    entries: searchHistory(
       db,
       query,
       query.trim() ? SEARCH_HISTORY_LIMIT : RECENT_HISTORY_LIMIT
-    )
-  );
+    ),
+  }));
   handle("theme:get", z.undefined(), () => theme.getState());
   handle("theme:set", themePreferenceSchema, (preference) =>
     theme.setPreference(preference)

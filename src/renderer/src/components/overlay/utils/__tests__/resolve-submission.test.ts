@@ -7,64 +7,48 @@ const RESULTS = [
   { id: 2, url: "https://example.org/", title: "" },
 ];
 
+const base = {
+  query: "exa",
+  results: RESULTS,
+  highlightedUrl: "",
+  hasMovedHighlight: false,
+  isNewTab: false,
+};
+
 describe("resolveSubmission", () => {
-  it("opens the highlighted result and carries the new-tab choice", () => {
+  it("opens the history result the user arrowed to and carries the new-tab choice", () => {
     expect(
       resolveSubmission({
-        query: "exa",
-        results: RESULTS,
+        ...base,
         highlightedUrl: "https://example.org/",
+        hasMovedHighlight: true,
         isNewTab: true,
-        isKeepingPrefill: false,
       })
     ).toEqual({ url: "https://example.org/", newTab: true });
   });
 
-  it("opens the first result before anything is highlighted", () => {
+  it("submits the typed text when the action row is the default or highlighted", () => {
+    expect(resolveSubmission(base)).toEqual({ url: "exa", newTab: false });
     expect(
       resolveSubmission({
-        query: "exa",
-        results: RESULTS,
-        highlightedUrl: "",
-        isNewTab: false,
-        isKeepingPrefill: false,
+        ...base,
+        highlightedUrl: "address-action",
+        hasMovedHighlight: true,
       })
-    ).toEqual({ url: "https://example.com/", newTab: false });
-  });
-
-  it("falls back to the typed text when there are no results", () => {
-    expect(
-      resolveSubmission({
-        query: " nowhere.dev ",
-        results: [],
-        highlightedUrl: "https://example.com/",
-        isNewTab: false,
-        isKeepingPrefill: false,
-      })
-    ).toEqual({ url: "nowhere.dev", newTab: false });
-  });
-
-  it("does nothing when there is neither a result nor text", () => {
-    expect(
-      resolveSubmission({
-        query: "  ",
-        results: [],
-        highlightedUrl: "",
-        isNewTab: false,
-        isKeepingPrefill: false,
-      })
-    ).toBeNull();
+    ).toEqual({ url: "exa", newTab: false });
   });
 
   it("submits an untouched prefill instead of a listed result", () => {
     expect(
-      resolveSubmission({
-        query: "https://current.test/",
-        results: RESULTS,
-        highlightedUrl: "https://example.com/",
-        isNewTab: false,
-        isKeepingPrefill: true,
-      })
+      resolveSubmission({ ...base, query: " https://current.test/ " })
     ).toEqual({ url: "https://current.test/", newTab: false });
+  });
+
+  it("opens the first recent result on a blank query, or nothing without one", () => {
+    expect(resolveSubmission({ ...base, query: "" })).toEqual({
+      url: "https://example.com/",
+      newTab: false,
+    });
+    expect(resolveSubmission({ ...base, query: "  ", results: [] })).toBeNull();
   });
 });

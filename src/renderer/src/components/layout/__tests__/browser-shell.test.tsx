@@ -52,7 +52,7 @@ function installApi() {
       return Promise.resolve();
     },
     navigateActiveTab: () => Promise.resolve(),
-    searchHistory: () => Promise.resolve([]),
+    searchHistory: () => Promise.resolve({ action: null, entries: [] }),
     getTheme: () => Promise.resolve({ preference: "system", isDark: false }),
     setTheme: () => Promise.resolve(),
     setViewBounds: () => {},

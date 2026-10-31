@@ -34,6 +34,13 @@ export type ToastRequest = z.infer<typeof toastSchema>;
 
 export type NavigateRequest = z.input<typeof navigateRequestSchema>;
 
+export type AddressAction = { kind: "url" | "search"; url: string };
+
+export type HistorySearchResult = {
+  action: AddressAction | null;
+  entries: HistoryEntry[];
+};
+
 export type PaletteIntent = { query: string };
 
 export type InvokeContract = {
@@ -43,7 +50,7 @@ export type InvokeContract = {
   "tabs:activate": { input: number; output: void };
   "tabs:navigate": { input: string; output: void };
   "overlay:navigate": { input: NavigateRequest; output: void };
-  "history:search": { input: string; output: HistoryEntry[] };
+  "history:search": { input: string; output: HistorySearchResult };
   "theme:get": { input: undefined; output: ThemeState };
   "theme:set": { input: ThemePreference; output: void };
 };
@@ -62,7 +69,7 @@ export type AppApi = {
   closeTab: (id: number) => Promise<void>;
   activateTab: (id: number) => Promise<void>;
   navigateActiveTab: (url: string) => Promise<void>;
-  searchHistory: (query: string) => Promise<HistoryEntry[]>;
+  searchHistory: (query: string) => Promise<HistorySearchResult>;
   getTheme: () => Promise<ThemeState>;
   setTheme: (preference: ThemePreference) => Promise<void>;
   setViewBounds: (bounds: ViewBounds) => void;

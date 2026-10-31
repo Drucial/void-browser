@@ -4,22 +4,25 @@ type Submission = {
   query: string;
   results: HistoryEntry[];
   highlightedUrl: string;
+  hasMovedHighlight: boolean;
   isNewTab: boolean;
-  isKeepingPrefill: boolean;
 };
 
-/** Picks what Enter navigates to: the highlighted result if listed, else the first result, else the typed text; an untouched prefill always submits the typed text; null when there is neither. */
+/** Picks what Enter navigates to: the history result the user arrowed to, else the first result on a blank query, else the typed text for main to resolve; null when there is neither. */
 export function resolveSubmission({
   query,
   results,
   highlightedUrl,
+  hasMovedHighlight,
   isNewTab,
-  isKeepingPrefill,
 }: Submission): NavigateRequest | null {
-  const highlighted = isKeepingPrefill
-    ? undefined
-    : (results.find((entry) => entry.url === highlightedUrl) ?? results[0]);
-  const url = highlighted?.url ?? query.trim();
+  const text = query.trim();
+  const chosen = hasMovedHighlight
+    ? results.find((entry) => entry.url === highlightedUrl)
+    : text
+      ? undefined
+      : results[0];
+  const url = chosen?.url ?? text;
 
   return url ? { url, newTab: isNewTab } : null;
 }

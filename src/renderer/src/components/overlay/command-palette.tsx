@@ -7,7 +7,6 @@ import { PALETTE_KEY_HINTS } from "@/components/overlay/constants/key-hints";
 import { resolveSubmission } from "@/components/overlay/utils/resolve-submission";
 import {
   CommandDialog,
-  CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
@@ -17,6 +16,8 @@ import { historyQueries } from "@/hooks/history/history.queries";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 const SEARCH_DEBOUNCE_MS = 150;
+const SEARCH_ENGINE_NAME = "DuckDuckGo"; // keep in step with SEARCH_URL in main's normalize-url
+const ACTION_ROW_VALUE = "address-action";
 
 type CommandPaletteProps = {
   initialQuery: string;
@@ -34,14 +35,14 @@ export function CommandPalette({
   const [hasMovedHighlight, setHasMovedHighlight] = useState(false);
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
   const isUntouched = query === initialQuery;
-  const { data: results = [], isFetching } = useQuery({
+  const { data } = useQuery({
     ...historyQueries.search(isUntouched ? "" : debouncedQuery),
     placeholderData: keepPreviousData,
   });
-  const isSettled = (isUntouched || debouncedQuery === query) && !isFetching;
-  const hasNoMatches = !isUntouched && isSettled && results.length === 0;
-  const isKeepingPrefill =
-    initialQuery !== "" && isUntouched && !hasMovedHighlight;
+  const results = data?.entries ?? [];
+  const action =
+    !isUntouched && debouncedQuery === query ? (data?.action ?? null) : null;
+  const typedText = query.trim();
   const navigate = useMutation({
     mutationFn: (request: NavigateRequest) =>
       window.overlayApi.navigate(request),
@@ -56,7 +57,7 @@ export function CommandPalette({
       title="Search history or enter an address"
       commandProps={{
         shouldFilter: false,
-        value: highlightedUrl,
+        value: action && !hasMovedHighlight ? ACTION_ROW_VALUE : highlightedUrl,
         onValueChange: setHighlightedUrl,
         onKeyDown: (event) => {
           if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -69,10 +70,10 @@ export function CommandPalette({
           event.preventDefault();
           const request = resolveSubmission({
             query,
-            results: isSettled ? results : [],
+            results,
             highlightedUrl,
+            hasMovedHighlight,
             isNewTab: event.ctrlKey || event.metaKey,
-            isKeepingPrefill,
           });
           if (request) navigate.mutate(request);
         },
@@ -84,10 +85,24 @@ export function CommandPalette({
         placeholder="Search history or enter an address"
         value={query}
         onFocus={(event) => event.currentTarget.select()}
-        onValueChange={setQuery}
+        onValueChange={(text) => {
+          setQuery(text);
+          setHasMovedHighlight(false);
+        }}
       />
       <CommandList className="h-72">
-        {hasNoMatches && <CommandEmpty>No matches</CommandEmpty>}
+        {action && (
+          <CommandItem
+            value={ACTION_ROW_VALUE}
+            onSelect={() => navigate.mutate({ url: typedText, newTab: false })}
+          >
+            <span className="truncate">
+              {action.kind === "search"
+                ? `Search ${SEARCH_ENGINE_NAME} for “${typedText}”`
+                : `Go to ${typedText}`}
+            </span>
+          </CommandItem>
+        )}
         {results.map((entry) => (
           <CommandItem
             key={entry.id}

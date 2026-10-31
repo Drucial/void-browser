@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import { historyQueries } from "@/hooks/history/history.queries";
 
 describe("historyQueries.search", () => {
-  it("shares one cache key across case and surrounding whitespace", () => {
+  it("shares one cache key across surrounding whitespace but not case", () => {
     expect(historyQueries.search("  Foo ").queryKey).toEqual(
+      historyQueries.search("Foo").queryKey
+    );
+    expect(historyQueries.search("Foo").queryKey).not.toEqual(
       historyQueries.search("foo").queryKey
     );
     expect(historyQueries.search("   ").queryKey).toEqual(
