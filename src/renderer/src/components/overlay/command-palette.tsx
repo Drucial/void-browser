@@ -92,7 +92,7 @@ export function CommandPalette({
           setHasMovedHighlight(false);
         }}
       />
-      <CommandList className="mt-2 h-72">
+      <CommandList className="mx-1 mt-2 h-72">
         {action && (
           <CommandItem
             value={ACTION_ROW_VALUE}
@@ -120,7 +120,7 @@ export function CommandPalette({
           </CommandItem>
         ))}
       </CommandList>
-      <div className="text-muted-foreground flex items-center gap-4 border-t px-3 py-2 text-xs">
+      <div className="text-muted-foreground mx-1 flex items-center gap-4 border-t px-3 py-2 text-xs">
         {PALETTE_KEY_HINTS.map(({ label, keys }) => (
           <span key={label} className="flex items-center gap-1">
             <KbdGroup>
