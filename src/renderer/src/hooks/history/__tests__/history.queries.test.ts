@@ -11,4 +11,9 @@ describe("historyQueries.search", () => {
       historyQueries.search("").queryKey
     );
   });
+
+  it("disables queries longer than main accepts", () => {
+    expect(historyQueries.search("a".repeat(500)).enabled).toBe(true);
+    expect(historyQueries.search("a".repeat(501)).enabled).toBe(false);
+  });
 });

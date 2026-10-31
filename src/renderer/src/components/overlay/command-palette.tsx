@@ -1,4 +1,4 @@
-import { useDeferredValue, useState } from "react";
+import { useState } from "react";
 
 import type { NavigateRequest } from "@shared/ipc";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
@@ -15,6 +15,9 @@ import {
 } from "@/components/ui/command";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { historyQueries } from "@/hooks/history/history.queries";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+
+const SEARCH_DEBOUNCE_MS = 150;
 
 type CommandPaletteProps = {
   initialQuery: string;
@@ -29,11 +32,17 @@ export function CommandPalette({
 }: CommandPaletteProps) {
   const [query, setQuery] = useState(initialQuery);
   const [highlightedUrl, setHighlightedUrl] = useState("");
-  const deferredQuery = useDeferredValue(query);
-  const { data: searchResults = [], isFetching } = useQuery({
-    ...historyQueries.search(deferredQuery),
+  const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
+  const search = historyQueries.search(debouncedQuery);
+  const isSearchEnabled =
+    search.enabled && (initialQuery === "" || query !== initialQuery);
+  const { data, isFetching } = useQuery({
+    ...search,
+    enabled: isSearchEnabled,
     placeholderData: keepPreviousData,
   });
+  const searchResults = isSearchEnabled && data ? data : [];
+  const isSettled = debouncedQuery === query && !isFetching;
   const {
     results,
     isShown: isListShown,
@@ -42,7 +51,7 @@ export function CommandPalette({
     query,
     initialQuery,
     results: searchResults,
-    isSettled: deferredQuery === query && !isFetching,
+    isSettled,
   });
   const navigate = useMutation({
     mutationFn: (request: NavigateRequest) =>
@@ -66,7 +75,7 @@ export function CommandPalette({
           event.preventDefault();
           const request = resolveSubmission({
             query,
-            results,
+            results: isSettled ? results : [],
             highlightedUrl,
             isNewTab: event.ctrlKey || event.metaKey,
           });
