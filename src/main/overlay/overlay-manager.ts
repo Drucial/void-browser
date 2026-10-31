@@ -120,8 +120,18 @@ export function createOverlayManager({
       });
       view.setBackgroundColor(TRANSPARENT);
       view.setVisible(false);
-      watchPaletteShortcut(view.webContents, getActiveUrl, openPalette);
-      watchSidebarShortcut(view.webContents, requestSidebarToggle);
+      const isPaletteClosed = () => !state.isModalOpen();
+      watchPaletteShortcut(
+        view.webContents,
+        getActiveUrl,
+        openPalette,
+        isPaletteClosed
+      );
+      watchSidebarShortcut(
+        view.webContents,
+        requestSidebarToggle,
+        isPaletteClosed
+      );
       loadPage(view.webContents);
       target.contentView.addChildView(view);
       target.on("resize", syncWindowSize);

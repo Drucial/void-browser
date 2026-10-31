@@ -60,10 +60,12 @@ describe("overlay state", () => {
     state.reportContentHeight(90);
     state.openModal();
 
+    expect(state.isModalOpen()).toBe(true);
     expect(state.getBounds()).toEqual({ x: 0, y: 0, ...WINDOW });
 
     state.closeModal();
 
+    expect(state.isModalOpen()).toBe(false);
     expect(state.getBounds()).toEqual({
       x: 620,
       y: 50,

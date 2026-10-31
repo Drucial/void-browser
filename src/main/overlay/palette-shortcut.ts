@@ -17,13 +17,16 @@ export function getPaletteIntent(
   return null;
 }
 
-/** Opens the palette when `contents` receives a palette shortcut, before the page sees it. */
+/** Opens the palette when `contents` receives a palette shortcut, before the page sees it; passes every key through while `isEnabled` returns false. */
 export function watchPaletteShortcut(
   contents: WebContents,
   getCurrentUrl: () => string,
-  openPalette: (query: string) => void
+  openPalette: (query: string) => void,
+  isEnabled: () => boolean = () => true
 ) {
   contents.on("before-input-event", (event, input) => {
+    if (!isEnabled()) return;
+
     const intent = getPaletteIntent(input, getCurrentUrl(), process.platform);
     if (!intent) return;
 

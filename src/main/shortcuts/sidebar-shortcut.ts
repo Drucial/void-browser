@@ -10,13 +10,14 @@ export function isSidebarToggle(input: KeyInput, platform: NodeJS.Platform) {
   return getCommandChordKey(input, platform) === SIDEBAR_TOGGLE_KEY;
 }
 
-/** Runs `toggleSidebar` when `contents` receives the sidebar shortcut, before the page sees it. */
+/** Runs `toggleSidebar` when `contents` receives the sidebar shortcut, before the page sees it; passes every key through while `isEnabled` returns false. */
 export function watchSidebarShortcut(
   contents: WebContents,
-  toggleSidebar: () => void
+  toggleSidebar: () => void,
+  isEnabled: () => boolean = () => true
 ) {
   contents.on("before-input-event", (event, input) => {
-    if (!isSidebarToggle(input, process.platform)) return;
+    if (!isEnabled() || !isSidebarToggle(input, process.platform)) return;
 
     event.preventDefault();
     toggleSidebar();

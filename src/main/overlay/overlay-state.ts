@@ -71,6 +71,8 @@ export function createOverlayState() {
 
     getPeekPhase: () => peekPhase,
 
+    isModalOpen: () => isModalOpen,
+
     showPeek() {
       if (isSidebarOpen || isModalOpen) return;
       peekPhase = "open";
