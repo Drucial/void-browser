@@ -1,6 +1,12 @@
 import type { AppApi, Tab } from "@shared/ipc";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BrowserShell } from "@/components/layout/browser-shell";
@@ -33,6 +39,7 @@ function installApi() {
   let activeId = 1;
   const listeners = new Set<() => void>();
   const openPalette = vi.fn<AppApi["openPalette"]>();
+  const toggleListeners = new Set<() => void>();
 
   const api: AppApi = {
     listTabs: () => Promise.resolve({ tabs: TABS, activeId }),
@@ -57,11 +64,19 @@ function installApi() {
       return () => listeners.delete(listener);
     },
     onThemeChanged: () => () => {},
+    onToggleSidebar: (listener) => {
+      toggleListeners.add(listener);
+
+      return () => toggleListeners.delete(listener);
+    },
   };
 
   window.api = api;
 
-  return { openPalette };
+  return {
+    openPalette,
+    relaySidebarToggle: () => toggleListeners.forEach((listener) => listener()),
+  };
 }
 
 function renderShell() {
@@ -83,9 +98,10 @@ beforeAll(() => {
 
 describe("BrowserShell", () => {
   let openPalette: ReturnType<typeof installApi>["openPalette"];
+  let relaySidebarToggle: ReturnType<typeof installApi>["relaySidebarToggle"];
 
   beforeEach(() => {
-    ({ openPalette } = installApi());
+    ({ openPalette, relaySidebarToggle } = installApi());
   });
 
   it("shows the active tab and its site in the address bar", async () => {
@@ -139,6 +155,20 @@ describe("BrowserShell", () => {
     expect(sidebar).toHaveAttribute("data-state", "collapsed");
 
     fireEvent.click(toggle);
+    expect(sidebar).toHaveAttribute("data-state", "expanded");
+  });
+
+  it("toggles the sidebar when main relays the shortcut", async () => {
+    renderShell();
+
+    const sidebar = (
+      await screen.findByRole("button", { name: "Electron" })
+    ).closest("[data-slot='sidebar']");
+
+    act(() => relaySidebarToggle());
+    expect(sidebar).toHaveAttribute("data-state", "collapsed");
+
+    act(() => relaySidebarToggle());
     expect(sidebar).toHaveAttribute("data-state", "expanded");
   });
 });

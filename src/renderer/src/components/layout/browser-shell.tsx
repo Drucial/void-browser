@@ -17,6 +17,7 @@ import { useTabsChangedSync } from "@/hooks/tabs/use-tabs-changed-sync";
 import { useViewBounds } from "@/hooks/tabs/use-view-bounds";
 import { getSiteLabel } from "@/utils/get-site-label";
 
+import { SidebarToggleListener } from "./sidebar-toggle-listener";
 import { TabList } from "./tab-list";
 
 export function BrowserShell() {
@@ -31,6 +32,7 @@ export function BrowserShell() {
 
   return (
     <SidebarProvider>
+      <SidebarToggleListener />
       <Sidebar>
         <SidebarHeader className="flex-row items-center">
           <SidebarMenu className="min-w-0 flex-1">

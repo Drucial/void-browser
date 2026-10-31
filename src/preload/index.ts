@@ -40,6 +40,12 @@ const api: AppApi = {
 
     return () => ipcRenderer.removeListener("theme:changed", handle);
   },
+  onToggleSidebar: (listener) => {
+    const handle = () => listener();
+    ipcRenderer.on("sidebar:toggle", handle);
+
+    return () => ipcRenderer.removeListener("sidebar:toggle", handle);
+  },
 };
 
 contextBridge.exposeInMainWorld("api", api);

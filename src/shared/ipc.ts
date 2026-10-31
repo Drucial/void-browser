@@ -70,6 +70,7 @@ export type AppApi = {
   openPalette: () => void;
   onTabsChanged: (listener: () => void) => () => void;
   onThemeChanged: (listener: () => void) => () => void;
+  onToggleSidebar: (listener: () => void) => () => void;
 };
 
 export type OverlayDataApi = Pick<

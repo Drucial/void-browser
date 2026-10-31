@@ -1,11 +1,8 @@
-import type { Input, WebContents } from "electron";
+import type { WebContents } from "electron";
 
 import type { PaletteIntent } from "../../shared/ipc";
-
-type KeyInput = Pick<
-  Input,
-  "type" | "key" | "control" | "meta" | "alt" | "shift"
->;
+import type { KeyInput } from "../shortcuts/command-chord";
+import { getCommandChordKey } from "../shortcuts/command-chord";
 
 /** Maps a key event to the palette intent it asks for: Ctrl/Cmd+T opens empty, Ctrl/Cmd+L opens on `currentUrl`. */
 export function getPaletteIntent(
@@ -13,11 +10,7 @@ export function getPaletteIntent(
   currentUrl: string,
   platform: NodeJS.Platform
 ): PaletteIntent | null {
-  const hasCommandModifier = platform === "darwin" ? input.meta : input.control;
-  if (input.type !== "keyDown" || !hasCommandModifier) return null;
-  if (input.alt || input.shift) return null;
-
-  const key = input.key.toLowerCase();
+  const key = getCommandChordKey(input, platform);
   if (key === "t") return { query: "" };
   if (key === "l") return { query: currentUrl };
 

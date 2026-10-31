@@ -9,6 +9,7 @@ import { registerIpcHandlers } from "./ipc/register-ipc-handlers";
 import type { OverlayManager } from "./overlay/overlay-manager";
 import { createOverlayManager } from "./overlay/overlay-manager";
 import { watchPaletteShortcut } from "./overlay/palette-shortcut";
+import { watchSidebarShortcut } from "./shortcuts/sidebar-shortcut";
 import { cleanUserAgent } from "./tabs/clean-user-agent";
 import { withColorSchemeHint } from "./tabs/color-scheme-hint";
 import type { TabManager } from "./tabs/tab-manager";
@@ -25,6 +26,10 @@ function loadRendererEntry(contents: WebContents, entry: string) {
   } else {
     contents.loadFile(join(__dirname, "../renderer", entry));
   }
+}
+
+function requestSidebarToggle() {
+  BrowserWindow.getAllWindows()[0]?.webContents.send("sidebar:toggle");
 }
 
 function createWindow(
@@ -64,6 +69,7 @@ function createWindow(
     tabs.getActiveUrl,
     overlay.openPalette
   );
+  watchSidebarShortcut(window.webContents, requestSidebarToggle);
   overlay.attach(window);
   tabs.restore(window);
   loadRendererEntry(window.webContents, "index.html");
@@ -110,9 +116,10 @@ app.whenReady().then(() => {
     loadPage: (contents) => loadRendererEntry(contents, "overlay.html"),
     focusActiveTab: tabs.focusActive,
   });
-  tabs.onViewCreated((contents) =>
-    watchPaletteShortcut(contents, tabs.getActiveUrl, overlay.openPalette)
-  );
+  tabs.onViewCreated((contents) => {
+    watchPaletteShortcut(contents, tabs.getActiveUrl, overlay.openPalette);
+    watchSidebarShortcut(contents, requestSidebarToggle);
+  });
   registerIpcHandlers(tabs, theme, overlay, db);
   createWindow(tabs, theme, overlay);
 
