@@ -124,4 +124,21 @@ describe("BrowserShell", () => {
 
     expect(openPalette).toHaveBeenCalledOnce();
   });
+
+  it("collapses and expands the sidebar from its header toggle", async () => {
+    renderShell();
+
+    const sidebar = (
+      await screen.findByRole("button", { name: "Electron" })
+    ).closest("[data-slot='sidebar']");
+    const toggle = screen.getByRole("button", { name: "Toggle Sidebar" });
+
+    expect(sidebar).toHaveAttribute("data-state", "expanded");
+
+    fireEvent.click(toggle);
+    expect(sidebar).toHaveAttribute("data-state", "collapsed");
+
+    fireEvent.click(toggle);
+    expect(sidebar).toHaveAttribute("data-state", "expanded");
+  });
 });

@@ -32,8 +32,8 @@ export function BrowserShell() {
   return (
     <SidebarProvider>
       <Sidebar>
-        <SidebarHeader>
-          <SidebarMenu>
+        <SidebarHeader className="flex-row items-center">
+          <SidebarMenu className="min-w-0 flex-1">
             <SidebarMenuItem>
               <SidebarMenuButton
                 aria-label="Address bar"
@@ -48,6 +48,7 @@ export function BrowserShell() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
+          <SidebarTrigger />
         </SidebarHeader>
         <SidebarContent>
           <TabList
@@ -60,9 +61,6 @@ export function BrowserShell() {
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <header className="flex items-center gap-2 p-2">
-          <SidebarTrigger />
-        </header>
         <div ref={viewBoundsRef} className="bg-background flex-1" />
       </SidebarInset>
     </SidebarProvider>
