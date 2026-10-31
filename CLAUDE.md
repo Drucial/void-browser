@@ -1,6 +1,6 @@
 # Project Guide
 
-Void is a minimalist Arc-style desktop browser. Electron + electron-vite, React 19, Tailwind v4, shadcn, TanStack Query, Drizzle over SQLite in the main process, Vitest. TypeScript strict; ESLint and Prettier enforced.
+Void is a minimalist Arc-style desktop browser. Electron + electron-vite, React 19, Tailwind v4, shadcn (`radix-maia` style, Inter), TanStack Query, Drizzle over SQLite in the main process, Vitest. TypeScript strict; ESLint and Prettier enforced.
 
 - `pnpm dev` runs the app with HMR; `pnpm build` bundles to `out/`; `pnpm start` previews the build.
 - `pnpm fix` auto-fixes lint and format; `pnpm check` verifies format, lint, and typecheck (node and web projects).
