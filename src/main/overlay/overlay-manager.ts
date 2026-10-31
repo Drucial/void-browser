@@ -98,7 +98,10 @@ export function createOverlayManager({
   }
 
   const hover = createPeekHover({ onShow: showPeek, onHide: hidePeek });
-  const leftExit = createLeftExitDetector(hover.exitedLeft);
+  const leftExit = createLeftExitDetector(
+    hover.exitedLeft,
+    hover.pointerReturned
+  );
 
   function syncWindowSize() {
     if (!window || window.isDestroyed()) return;

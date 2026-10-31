@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   createPeekHover,
-  EXIT_IDLE_HIDE_MS,
+  EXIT_SETTLE_MS,
   HOVER_HIDE_DELAY_MS,
   HOVER_SHOW_DELAY_MS,
 } from "../peek-hover";
@@ -84,45 +84,36 @@ describe("peek hover", () => {
     expect(onHide).not.toHaveBeenCalled();
   });
 
-  it("shows at once when the pointer exits left, then hides if it never returns", () => {
+  it("shows at once on an exit and stays open while the pointer never returns", () => {
     const { hover, onShow, onHide } = createHover();
     hover.exitedLeft();
+    vi.advanceTimersByTime(60_000);
 
     expect(onShow).toHaveBeenCalledOnce();
-
-    vi.advanceTimersByTime(EXIT_IDLE_HIDE_MS - 1);
-
     expect(onHide).not.toHaveBeenCalled();
-
-    vi.advanceTimersByTime(1);
-
-    expect(onHide).toHaveBeenCalledOnce();
   });
 
-  it("keeps the exit-opened nav while the pointer rests on the panel, then hides after it leaves", () => {
-    const { hover, onHide } = createHover();
-    hover.exitedLeft();
-    hover.setInside("panel", true);
-    vi.advanceTimersByTime(EXIT_IDLE_HIDE_MS * 2);
-
-    expect(onHide).not.toHaveBeenCalled();
-
-    hover.setInside("panel", false);
-    vi.advanceTimersByTime(HOVER_HIDE_DELAY_MS);
-
-    expect(onHide).toHaveBeenCalledOnce();
-  });
-
-  it("is not cut short by gutter or panel reports that trail an exit", () => {
+  it("is not ended by gutter or panel reports that trail an exit", () => {
     const { hover, onShow, onHide } = createHover();
     hover.exitedLeft();
     hover.setInside("gutter", true);
     hover.setInside("gutter", false);
     hover.setInside("panel", true);
     hover.setInside("panel", false);
-    vi.advanceTimersByTime(EXIT_IDLE_HIDE_MS - 1);
+    hover.pointerReturned();
+    vi.advanceTimersByTime(60_000);
 
     expect(onShow).toHaveBeenCalledOnce();
+    expect(onHide).not.toHaveBeenCalled();
+  });
+
+  it("hides the leave delay after the pointer returns elsewhere in the window", () => {
+    const { hover, onHide } = createHover();
+    hover.exitedLeft();
+    vi.advanceTimersByTime(EXIT_SETTLE_MS);
+    hover.pointerReturned();
+    vi.advanceTimersByTime(HOVER_HIDE_DELAY_MS - 1);
+
     expect(onHide).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(1);
@@ -130,17 +121,42 @@ describe("peek hover", () => {
     expect(onHide).toHaveBeenCalledOnce();
   });
 
-  it("hides at the exit delay when a trailing panel leave arrives without its enter", () => {
+  it("keeps the nav when a pointer return is followed by a panel enter", () => {
     const { hover, onHide } = createHover();
     hover.exitedLeft();
-    hover.setInside("panel", false);
-    vi.advanceTimersByTime(HOVER_HIDE_DELAY_MS);
+    vi.advanceTimersByTime(EXIT_SETTLE_MS);
+    hover.pointerReturned();
+    vi.advanceTimersByTime(HOVER_HIDE_DELAY_MS - 1);
+    hover.setInside("panel", true);
+    vi.advanceTimersByTime(60_000);
+
+    expect(onHide).not.toHaveBeenCalled();
+  });
+
+  it("applies the normal rules once the pointer enters the panel after an exit", () => {
+    const { hover, onHide } = createHover();
+    hover.exitedLeft();
+    vi.advanceTimersByTime(EXIT_SETTLE_MS);
+    hover.setInside("panel", true);
+    vi.advanceTimersByTime(60_000);
 
     expect(onHide).not.toHaveBeenCalled();
 
-    vi.advanceTimersByTime(EXIT_IDLE_HIDE_MS);
+    hover.setInside("panel", false);
+    vi.advanceTimersByTime(HOVER_HIDE_DELAY_MS);
 
     expect(onHide).toHaveBeenCalledOnce();
+  });
+
+  it("ends the hold on reset", () => {
+    const { hover, onHide } = createHover();
+    hover.exitedLeft();
+    hover.reset();
+    vi.advanceTimersByTime(EXIT_SETTLE_MS);
+    hover.pointerReturned();
+    vi.advanceTimersByTime(HOVER_HIDE_DELAY_MS);
+
+    expect(onHide).not.toHaveBeenCalled();
   });
 
   it("ignores an exit report while the pointer is on the panel", () => {

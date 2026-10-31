@@ -18,10 +18,14 @@ export function watchLeftExit(
 
 export type LeftExitDetector = ReturnType<typeof createLeftExitDetector>;
 
-/** Calls `onExit` when a leftward move ends at the edge (fast within the zone or one step of the edge, any speed within the band) and no pointer event follows; the moves of every view in the window feed one history. */
-export function createLeftExitDetector(onExit: () => void) {
+/** Calls `onReturn` on the first move after an exit fired, and `onExit` when a leftward move ends at the edge (fast within the zone or one step of the edge, any speed within the band) and no pointer event follows; the moves of every view in the window feed one history. */
+export function createLeftExitDetector(
+  onExit: () => void,
+  onReturn: () => void
+) {
   let last: { x: number; y: number; at: number } | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let hasExited = false;
 
   function isLeftwardToEdge(
     from: { x: number; y: number; at: number },
@@ -43,6 +47,11 @@ export function createLeftExitDetector(onExit: () => void) {
     move(x: number, y: number) {
       if (last?.x === x && last.y === y) return;
 
+      if (hasExited) {
+        hasExited = false;
+        onReturn();
+      }
+
       const from = last;
       const to = { x, y, at: Date.now() };
       last = to;
@@ -51,6 +60,7 @@ export function createLeftExitDetector(onExit: () => void) {
 
       timer = setTimeout(() => {
         last = undefined;
+        hasExited = true;
         onExit();
       }, LEFT_EXIT_IDLE_MS);
     },

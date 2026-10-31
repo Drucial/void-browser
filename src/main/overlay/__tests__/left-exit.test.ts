@@ -11,8 +11,13 @@ const MOUSE_SAMPLE_MS = 7;
 
 function createDetector() {
   const onExit = vi.fn();
+  const onReturn = vi.fn();
 
-  return { onExit, detector: createLeftExitDetector(onExit) };
+  return {
+    onExit,
+    onReturn,
+    detector: createLeftExitDetector(onExit, onReturn),
+  };
 }
 
 describe("left exit detector", () => {
@@ -130,5 +135,24 @@ describe("left exit detector", () => {
     vi.advanceTimersByTime(LEFT_EXIT_IDLE_MS * 5);
 
     expect(onExit).toHaveBeenCalledOnce();
+  });
+
+  it("reports the first move after an exit as a return, once", () => {
+    const { detector, onExit, onReturn } = createDetector();
+    detector.move(400, 300);
+    vi.advanceTimersByTime(8);
+    detector.move(LEFT_EXIT_ZONE_PX - 10, 300);
+
+    expect(onReturn).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(LEFT_EXIT_IDLE_MS);
+
+    expect(onExit).toHaveBeenCalledOnce();
+    expect(onReturn).not.toHaveBeenCalled();
+
+    detector.move(300, 300);
+    detector.move(310, 300);
+
+    expect(onReturn).toHaveBeenCalledOnce();
   });
 });
