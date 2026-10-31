@@ -10,8 +10,14 @@ import {
 function createHover() {
   const onShow = vi.fn();
   const onHide = vi.fn();
+  const onDismiss = vi.fn();
 
-  return { onShow, onHide, hover: createPeekHover({ onShow, onHide }) };
+  return {
+    onShow,
+    onHide,
+    onDismiss,
+    hover: createPeekHover({ onShow, onHide, onDismiss }),
+  };
 }
 
 describe("peek hover", () => {
@@ -208,5 +214,29 @@ describe("peek hover while a button is held", () => {
     hover.exitedLeft();
 
     expect(onShow).not.toHaveBeenCalled();
+  });
+});
+
+describe("peek hover click outside", () => {
+  it("dismisses an open peek on a press away from the panel", () => {
+    const { hover, onDismiss } = createHover();
+    hover.pressedOnPage(true);
+
+    expect(onDismiss).toHaveBeenCalledOnce();
+  });
+
+  it("keeps the peek when the pointer is on the panel", () => {
+    const { hover, onDismiss } = createHover();
+    hover.setInside("panel", true);
+    hover.pressedOnPage(true);
+
+    expect(onDismiss).not.toHaveBeenCalled();
+  });
+
+  it("does nothing when no peek is open", () => {
+    const { hover, onDismiss } = createHover();
+    hover.pressedOnPage(false);
+
+    expect(onDismiss).not.toHaveBeenCalled();
   });
 });

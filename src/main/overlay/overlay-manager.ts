@@ -86,6 +86,11 @@ export function createOverlayManager({
     peekExitTimer = setTimeout(endPeekExit, PEEK_EXIT_TIMEOUT_MS);
   }
 
+  function dismissPeek() {
+    hover.reset();
+    hidePeek();
+  }
+
   function openPalette(query: string) {
     const wasPeeking = state.getPeekPhase() !== "off";
     hover.reset();
@@ -98,7 +103,11 @@ export function createOverlayManager({
     view?.webContents.send("overlay:open", { query });
   }
 
-  const hover = createPeekHover({ onShow: showPeek, onHide: hidePeek });
+  const hover = createPeekHover({
+    onShow: showPeek,
+    onHide: hidePeek,
+    onDismiss: dismissPeek,
+  });
   const leftExit = createLeftExitDetector(
     hover.exitedLeft,
     hover.pointerReturned
@@ -200,17 +209,18 @@ export function createOverlayManager({
       hover.setInside(zone, isInside);
     },
 
-    /** Shows the floating nav when the pointer leaves the window across its left edge after moving through `contents`, and tracks its held mouse buttons. */
+    /** Shows the floating nav when the pointer leaves the window across its left edge after moving through `contents`, tracks its held mouse buttons, and dismisses an open peek on a press. */
     watchPointer(contents: WebContents) {
       watchLeftExit(contents, leftExit);
       watchPressedButtons(contents, hover.setPressed);
+      contents.on("before-mouse-event", (_event, mouse) => {
+        if (mouse.type === "mouseDown")
+          hover.pressedOnPage(state.getPeekPhase() === "open");
+      });
     },
 
     /** Starts the slide-out right away, ignoring where the pointer is. */
-    dismissPeek() {
-      hover.reset();
-      hidePeek();
-    },
+    dismissPeek,
 
     /** Asks the shell to toggle its sidebar. */
     toggleSidebar: requestSidebarToggle,

@@ -7,10 +7,15 @@ export const EXIT_SETTLE_MS = 50; // the overlay reports a stray panel enter and
 type PeekHoverHandlers = {
   onShow: () => void;
   onHide: () => void;
+  onDismiss: () => void;
 };
 
 /** Turns pointer enter/leave reports from the edge gutter and the panel into debounced show and hide requests. */
-export function createPeekHover({ onShow, onHide }: PeekHoverHandlers) {
+export function createPeekHover({
+  onShow,
+  onHide,
+  onDismiss,
+}: PeekHoverHandlers) {
   const zonesInside = new Set<PeekZone>();
   let timer: ReturnType<typeof setTimeout> | undefined;
   let isHeldByExit = false;
@@ -75,6 +80,11 @@ export function createPeekHover({ onShow, onHide }: PeekHoverHandlers) {
 
       isShowDeferred = false;
       if (zonesInside.has("gutter")) timer = startShowTimer();
+    },
+
+    /** Dismisses an open peek at once for a press on the shell or a page, unless the pointer is on the panel. */
+    pressedOnPage(isPeekOpen: boolean) {
+      if (isPeekOpen && !zonesInside.has("panel")) onDismiss();
     },
 
     /** Forgets where the pointer is and cancels any pending request. */
