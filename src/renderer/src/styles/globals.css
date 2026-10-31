@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @utility transition-peek {
-  transition-property: transform, opacity;
+  transition-property: transform;
   transition-duration: 280ms;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1), ease-out;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @theme inline {
