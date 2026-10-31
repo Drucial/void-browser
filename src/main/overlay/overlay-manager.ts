@@ -5,6 +5,7 @@ import { WebContentsView } from "electron";
 
 import type { PeekZone, ToastRequest, ViewBounds } from "../../shared/ipc";
 import { watchSidebarShortcut } from "../shortcuts/sidebar-shortcut";
+import { createLeftExitDetector, watchLeftExit } from "./left-exit";
 import { createOverlayState } from "./overlay-state";
 import { watchPaletteShortcut } from "./palette-shortcut";
 import { createPeekHover } from "./peek-hover";
@@ -97,6 +98,7 @@ export function createOverlayManager({
   }
 
   const hover = createPeekHover({ onShow: showPeek, onHide: hidePeek });
+  const leftExit = createLeftExitDetector(hover.exitedLeft);
 
   function syncWindowSize() {
     if (!window || window.isDestroyed()) return;
@@ -191,6 +193,11 @@ export function createOverlayManager({
     /** Applies a pointer enter or leave reported for the edge gutter or the panel. */
     setPeekHover(zone: PeekZone, isInside: boolean) {
       hover.setInside(zone, isInside);
+    },
+
+    /** Shows the floating nav when the pointer leaves the window across its left edge after moving through `contents`. */
+    watchPointerExit(contents: WebContents) {
+      watchLeftExit(contents, leftExit);
     },
 
     /** Starts the slide-out right away, ignoring where the pointer is. */

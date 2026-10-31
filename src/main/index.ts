@@ -70,6 +70,7 @@ function createWindow(
     overlay.openPalette
   );
   watchSidebarShortcut(window.webContents, requestSidebarToggle);
+  overlay.watchPointerExit(window.webContents);
   overlay.attach(window);
   tabs.restore(window);
   loadRendererEntry(window.webContents, "index.html");
@@ -122,6 +123,7 @@ app.whenReady().then(() => {
   tabs.onViewCreated((contents) => {
     watchPaletteShortcut(contents, tabs.getActiveUrl, overlay.openPalette);
     watchSidebarShortcut(contents, requestSidebarToggle);
+    overlay.watchPointerExit(contents);
   });
   registerIpcHandlers(tabs, theme, overlay, db);
   createWindow(tabs, theme, overlay);
