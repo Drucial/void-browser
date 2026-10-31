@@ -14,9 +14,9 @@ import { cleanUserAgent } from "./tabs/clean-user-agent";
 import { withColorSchemeHint } from "./tabs/color-scheme-hint";
 import type { TabManager } from "./tabs/tab-manager";
 import { createTabManager } from "./tabs/tab-manager";
-import { getBackgroundColor } from "./theme/background-color";
 import type { ThemeController } from "./theme/theme-controller";
 import { createThemeController } from "./theme/theme-controller";
+import { getWindowBackground } from "./theme/window-background";
 
 function loadRendererEntry(contents: WebContents, entry: string) {
   const rendererUrl = process.env["ELECTRON_RENDERER_URL"];
@@ -41,7 +41,7 @@ function createWindow(
     width: 1200,
     height: 800,
     show: false,
-    backgroundColor: getBackgroundColor(theme.getState().isDark),
+    ...getWindowBackground(theme.getState().isDark, process.platform),
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
@@ -53,7 +53,9 @@ function createWindow(
 
   window.on("ready-to-show", () => window.show());
   const stopFollowingTheme = theme.onChanged((state) => {
-    window.setBackgroundColor(getBackgroundColor(state.isDark));
+    window.setBackgroundColor(
+      getWindowBackground(state.isDark, process.platform).backgroundColor
+    );
     window.webContents.send("theme:changed");
     overlay.notifyThemeChanged();
   });
