@@ -34,10 +34,7 @@ export type ToastRequest = z.infer<typeof toastSchema>;
 
 export type NavigateRequest = z.input<typeof navigateRequestSchema>;
 
-export type AddressAction = { kind: "url" | "search"; url: string };
-
 export type HistorySearchResult = {
-  action: AddressAction | null;
   entries: HistoryEntry[];
 };
 

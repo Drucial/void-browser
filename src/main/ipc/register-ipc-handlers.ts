@@ -1,12 +1,12 @@
 import { ipcMain } from "electron";
 import { z } from "zod";
 
+import { resolveAddressInput } from "../../shared/address-input";
 import type { InvokeContract, SendContract } from "../../shared/ipc";
 import type { AppDatabase } from "../db/database";
 import { searchHistory } from "../db/history";
 import { themePreferenceSchema } from "../db/settings";
 import type { OverlayManager } from "../overlay/overlay-manager";
-import { resolveAddressInput } from "../tabs/normalize-url";
 import type { TabManager } from "../tabs/tab-manager";
 import type { ThemeController } from "../theme/theme-controller";
 
@@ -82,7 +82,6 @@ export function registerIpcHandlers(
     else tabs.navigateActive(url);
   });
   handle("history:search", z.string().max(500), (query) => ({
-    action: resolveAddressInput(query),
     entries: searchHistory(
       db,
       query,

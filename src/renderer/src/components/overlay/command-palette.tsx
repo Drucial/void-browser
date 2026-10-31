@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { resolveAddressInput, SEARCH_ENGINE_NAME } from "@shared/address-input";
 import type { NavigateRequest } from "@shared/ipc";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 
@@ -16,7 +17,6 @@ import { historyQueries } from "@/hooks/history/history.queries";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 const SEARCH_DEBOUNCE_MS = 150;
-const SEARCH_ENGINE_NAME = "DuckDuckGo"; // keep in step with SEARCH_URL in main's normalize-url
 const ACTION_ROW_VALUE = "address-action";
 
 type CommandPaletteProps = {
@@ -41,7 +41,9 @@ export function CommandPalette({
   });
   const results = data?.entries ?? [];
   const action =
-    !isUntouched && debouncedQuery === query ? (data?.action ?? null) : null;
+    !isUntouched && debouncedQuery === query
+      ? resolveAddressInput(query)
+      : null;
   const typedText = query.trim();
   const navigate = useMutation({
     mutationFn: (request: NavigateRequest) =>

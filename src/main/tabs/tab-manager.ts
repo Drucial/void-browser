@@ -1,6 +1,7 @@
 import type { BrowserWindow, WebContents } from "electron";
 import { WebContentsView } from "electron";
 
+import { normalizeUrl } from "../../shared/address-input";
 import type { Tab, TabsSnapshot, ViewBounds } from "../../shared/ipc";
 import type { AppDatabase } from "../db/database";
 import { recordVisit, setUrlTitle } from "../db/history";
@@ -8,7 +9,7 @@ import { closeTab, createTab, listTabs, updateTab } from "../db/tabs";
 import { getBackgroundColor } from "../theme/background-color";
 import type { ThemeController } from "../theme/theme-controller";
 import { pickActiveAfterClose } from "./active-tab";
-import { isAllowedUrl, normalizeUrl } from "./normalize-url";
+import { isAllowedUrl } from "./normalize-url";
 
 const DEFAULT_TAB_URL = "https://duckduckgo.com/";
 const VIEW_BORDER_RADIUS = 14; // matches the shell's SidebarInset card (rounded-xl: 0.875rem)

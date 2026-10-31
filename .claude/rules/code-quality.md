@@ -37,7 +37,7 @@ Electron + React 19 + TypeScript (strict) + Tailwind v4. Hard conventions for th
 - The sandboxed preload can only `require` `electron` and a few core modules. It cannot import Node builtins such as `node:path`.
 - Never expose `ipcRenderer` or raw channel names to the renderer; expose named functions.
 - Validate every IPC payload at the main-process boundary with zod.
-- Renderer and main share types, never runtime code.
+- Renderer and main share types and pure, dependency-free modules in `src/shared` (no Node or Electron imports), never other runtime code.
 
 ## React discipline
 

@@ -11,6 +11,7 @@ export default defineConfig({
         resolve: {
           alias: {
             "@": resolve(__dirname, "src/renderer/src"),
+            "@shared": resolve(__dirname, "src/shared"),
           },
         },
         test: {
@@ -24,7 +25,7 @@ export default defineConfig({
         test: {
           name: "main",
           environment: "node",
-          include: ["src/main/**/*.test.ts"],
+          include: ["src/main/**/*.test.ts", "src/shared/**/*.test.ts"],
         },
       },
     ],
