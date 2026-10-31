@@ -4,7 +4,6 @@ import { resolveAddressInput, SEARCH_ENGINE_NAME } from "@shared/address-input";
 import type { NavigateRequest } from "@shared/ipc";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 
-import { PALETTE_KEY_HINTS } from "@/components/overlay/constants/key-hints";
 import { resolveSubmission } from "@/components/overlay/utils/resolve-submission";
 import {
   CommandDialog,
@@ -12,7 +11,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { historyQueries } from "@/hooks/history/history.queries";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
@@ -92,7 +90,7 @@ export function CommandPalette({
           setHasMovedHighlight(false);
         }}
       />
-      <CommandList className="mt-2 h-72">
+      <CommandList className="mt-2 mb-1 h-72">
         {action && (
           <CommandItem
             value={ACTION_ROW_VALUE}
@@ -120,18 +118,6 @@ export function CommandPalette({
           </CommandItem>
         ))}
       </CommandList>
-      <div className="text-muted-foreground mx-1 flex items-center gap-4 border-t px-3 py-2 text-xs">
-        {PALETTE_KEY_HINTS.map(({ label, keys }) => (
-          <span key={label} className="flex items-center gap-1">
-            <KbdGroup>
-              {keys.map((key) => (
-                <Kbd key={key}>{key}</Kbd>
-              ))}
-            </KbdGroup>
-            {label}
-          </span>
-        ))}
-      </div>
     </CommandDialog>
   );
 }
