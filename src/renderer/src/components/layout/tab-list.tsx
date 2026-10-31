@@ -27,31 +27,33 @@ export function TabList({
 }: TabListProps) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Tabs</SidebarGroupLabel>
-      <SidebarMenu>
-        {tabs.map((tab) => (
-          <SidebarMenuItem key={tab.id}>
-            <SidebarMenuButton
-              isActive={tab.id === activeTabId}
-              onClick={() => onSelectTab(tab.id)}
-            >
-              <span>{tab.title || tab.url}</span>
+      <div className="-mx-1">
+        <SidebarGroupLabel>Tabs</SidebarGroupLabel>
+        <SidebarMenu>
+          {tabs.map((tab) => (
+            <SidebarMenuItem key={tab.id}>
+              <SidebarMenuButton
+                isActive={tab.id === activeTabId}
+                onClick={() => onSelectTab(tab.id)}
+              >
+                <span>{tab.title || tab.url}</span>
+              </SidebarMenuButton>
+              <SidebarMenuAction
+                aria-label={`Close ${tab.title || tab.url}`}
+                onClick={() => onCloseTab(tab.id)}
+              >
+                <XIcon />
+              </SidebarMenuAction>
+            </SidebarMenuItem>
+          ))}
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={onCreateTab}>
+              <PlusIcon />
+              New tab
             </SidebarMenuButton>
-            <SidebarMenuAction
-              aria-label={`Close ${tab.title || tab.url}`}
-              onClick={() => onCloseTab(tab.id)}
-            >
-              <XIcon />
-            </SidebarMenuAction>
           </SidebarMenuItem>
-        ))}
-        <SidebarMenuItem>
-          <SidebarMenuButton onClick={onCreateTab}>
-            <PlusIcon />
-            New tab
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
+        </SidebarMenu>
+      </div>
     </SidebarGroup>
   );
 }
