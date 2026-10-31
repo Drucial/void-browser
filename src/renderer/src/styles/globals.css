@@ -82,7 +82,12 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar: var(--background);
+  --shell-opacity: 0.7;
+  --sidebar: color-mix(
+    in oklab,
+    var(--background) calc(var(--shell-opacity) * 100%),
+    transparent
+  );
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -116,7 +121,12 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: var(--background);
+  --shell-opacity: 0.65;
+  --sidebar: color-mix(
+    in oklab,
+    var(--background) calc(var(--shell-opacity) * 100%),
+    transparent
+  );
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -126,12 +136,18 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+@layer components {
+  [data-slot="sidebar"][data-variant="inset"] [data-slot="sidebar-inner"] {
+    background-color: transparent;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground bg-transparent;
   }
   html {
     @apply font-sans;
