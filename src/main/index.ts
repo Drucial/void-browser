@@ -115,7 +115,9 @@ app.whenReady().then(() => {
   const overlay = createOverlayManager({
     loadPage: (contents) => loadRendererEntry(contents, "overlay.html"),
     focusActiveTab: tabs.focusActive,
+    requestSidebarToggle,
   });
+  tabs.onChanged(overlay.notifyTabsChanged);
   tabs.onViewCreated((contents) => {
     watchPaletteShortcut(contents, tabs.getActiveUrl, overlay.openPalette);
     watchSidebarShortcut(contents, requestSidebarToggle);

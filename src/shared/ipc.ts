@@ -6,6 +6,8 @@ import type {
   boundsSchema,
   contentHeightSchema,
   navigateRequestSchema,
+  peekHoverSchema,
+  sidebarStateSchema,
   toastSchema,
 } from "../main/ipc/register-ipc-handlers";
 
@@ -38,6 +40,12 @@ export type HistorySearchResult = {
   entries: HistoryEntry[];
 };
 
+export type PeekHover = z.infer<typeof peekHoverSchema>;
+
+export type PeekZone = PeekHover["zone"];
+
+export type SidebarState = z.infer<typeof sidebarStateSchema>;
+
 export type PaletteIntent = { query: string };
 
 export type InvokeContract = {
@@ -57,6 +65,11 @@ export type SendContract = {
   "overlay:open-palette": undefined;
   "overlay:close": undefined;
   "overlay:report-content-height": z.infer<typeof contentHeightSchema>;
+  "overlay:peek-dismiss": undefined;
+  "overlay:peek-exited": undefined;
+  "overlay:toggle-sidebar": undefined;
+  "peek:hover": PeekHover;
+  "sidebar:state": SidebarState;
 };
 
 export type AppApi = {
@@ -70,6 +83,8 @@ export type AppApi = {
   setViewBounds: (bounds: ViewBounds) => void;
   showToast: (toast: ToastRequest) => void;
   openPalette: () => void;
+  reportSidebarOpen: (open: boolean) => void;
+  reportGutterHover: (isInside: boolean) => void;
   onTabsChanged: (listener: () => void) => () => void;
   onThemeChanged: (listener: () => void) => () => void;
   onToggleSidebar: (listener: () => void) => () => void;
@@ -77,7 +92,16 @@ export type AppApi = {
 
 export type OverlayDataApi = Pick<
   AppApi,
-  "getTheme" | "onThemeChanged" | "searchHistory"
+  | "getTheme"
+  | "onThemeChanged"
+  | "searchHistory"
+  | "listTabs"
+  | "createTab"
+  | "closeTab"
+  | "activateTab"
+  | "openPalette"
+  | "showToast"
+  | "onTabsChanged"
 >;
 
 export type OverlayApi = {
@@ -86,4 +110,9 @@ export type OverlayApi = {
   close: () => void;
   onOpen: (listener: (intent: PaletteIntent) => void) => () => void;
   onToast: (listener: (toast: ToastRequest) => void) => () => void;
+  onPeek: (listener: (isOpen: boolean) => void) => () => void;
+  reportPanelHover: (isInside: boolean) => void;
+  dismissPeek: () => void;
+  confirmPeekExit: () => void;
+  toggleSidebar: () => void;
 };

@@ -24,6 +24,7 @@ export function createTabManager(db: AppDatabase, theme: ThemeController) {
   let activeId: number | null = null;
   let bounds: ViewBounds = HIDDEN_BOUNDS;
   const stackListeners = new Set<() => void>();
+  const changeListeners = new Set<() => void>();
   const viewListeners = new Set<(contents: WebContents) => void>();
 
   theme.onChanged((state) => {
@@ -36,6 +37,7 @@ export function createTabManager(db: AppDatabase, theme: ThemeController) {
     if (window && !window.isDestroyed()) {
       window.webContents.send("tabs:changed");
     }
+    changeListeners.forEach((listener) => listener());
   }
 
   function getSnapshot(): TabsSnapshot {
@@ -154,6 +156,13 @@ export function createTabManager(db: AppDatabase, theme: ThemeController) {
       stackListeners.add(listener);
 
       return () => stackListeners.delete(listener);
+    },
+
+    /** Runs `listener` after every change to the tabs or the active tab; returns an unsubscribe. */
+    onChanged(listener: () => void) {
+      changeListeners.add(listener);
+
+      return () => changeListeners.delete(listener);
     },
 
     /** Runs `listener` with the contents of every tab view as it is created; returns an unsubscribe. */

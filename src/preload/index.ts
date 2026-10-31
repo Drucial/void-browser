@@ -27,6 +27,9 @@ const api: AppApi = {
   setViewBounds: (bounds) => send("view:set-bounds", bounds),
   showToast: (toast) => send("overlay:toast", toast),
   openPalette: () => send("overlay:open-palette", undefined),
+  reportSidebarOpen: (open) => send("sidebar:state", { open }),
+  reportGutterHover: (isInside) =>
+    send("peek:hover", { zone: "gutter", isInside }),
   onTabsChanged: (listener) => {
     const handle = () => listener();
     ipcRenderer.on("tabs:changed", handle);

@@ -57,6 +57,8 @@ function installApi() {
     setViewBounds: () => {},
     showToast: () => {},
     openPalette,
+    reportSidebarOpen: () => {},
+    reportGutterHover: () => {},
     onTabsChanged: (listener) => {
       listeners.add(listener);
 

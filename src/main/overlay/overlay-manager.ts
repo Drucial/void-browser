@@ -3,8 +3,9 @@ import { join } from "node:path";
 import type { BrowserWindow, WebContents } from "electron";
 import { WebContentsView } from "electron";
 
-import type { ToastRequest, ViewBounds } from "../../shared/ipc";
+import type { PeekZone, ToastRequest, ViewBounds } from "../../shared/ipc";
 import { createOverlayState } from "./overlay-state";
+import { createPeekHover } from "./peek-hover";
 
 const TRANSPARENT = "#00000000";
 const PEEK_EXIT_TIMEOUT_MS = 400; // hides the view even if the renderer never confirms its 200ms slide-out
@@ -14,12 +15,14 @@ export type OverlayManager = ReturnType<typeof createOverlayManager>;
 type OverlayDeps = {
   loadPage: (contents: WebContents) => void;
   focusActiveTab: () => void;
+  requestSidebarToggle: () => void;
 };
 
 /** Owns the one transparent topmost view that hosts app UI over tab pages; hidden unless something is showing. */
 export function createOverlayManager({
   loadPage,
   focusActiveTab,
+  requestSidebarToggle,
 }: OverlayDeps) {
   const state = createOverlayState();
   let window: BrowserWindow | null = null;
@@ -53,6 +56,7 @@ export function createOverlayManager({
   function endPeekExit() {
     clearTimeout(peekExitTimer);
     peekExitTimer = undefined;
+    hover.reset();
     state.finishPeekExit();
     applyBounds();
   }
@@ -75,6 +79,8 @@ export function createOverlayManager({
     clearTimeout(peekExitTimer);
     peekExitTimer = setTimeout(endPeekExit, PEEK_EXIT_TIMEOUT_MS);
   }
+
+  const hover = createPeekHover({ onShow: showPeek, onHide: hidePeek });
 
   function syncWindowSize() {
     if (!window || window.isDestroyed()) return;
@@ -148,12 +154,30 @@ export function createOverlayManager({
     /** Records whether the shell's sidebar is pinned open; opening it hides the floating nav. */
     setSidebarOpen(open: boolean) {
       state.setSidebarOpen(open);
-      if (open) hidePeek();
+      if (!open) return;
+
+      hover.reset();
+      hidePeek();
     },
+
+    /** Applies a pointer enter or leave reported for the edge gutter or the panel. */
+    setPeekHover(zone: PeekZone, isInside: boolean) {
+      hover.setInside(zone, isInside);
+    },
+
+    /** Starts the slide-out right away, ignoring where the pointer is. */
+    dismissPeek() {
+      hover.reset();
+      hidePeek();
+    },
+
+    /** Asks the shell to toggle its sidebar. */
+    toggleSidebar: requestSidebarToggle,
 
     /** Covers the window with the overlay and shows the command palette prefilled with `query`. */
     openPalette(query: string) {
       const wasPeeking = state.getPeekPhase() !== "off";
+      hover.reset();
       clearTimeout(peekExitTimer);
       peekExitTimer = undefined;
       state.openModal();
@@ -167,6 +191,10 @@ export function createOverlayManager({
     closeModal() {
       state.closeModal();
       applyBounds();
+    },
+
+    notifyTabsChanged() {
+      view?.webContents.send("tabs:changed");
     },
 
     notifyThemeChanged() {

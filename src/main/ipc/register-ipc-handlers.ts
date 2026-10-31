@@ -42,6 +42,13 @@ export const toastSchema = z.object({
   message: z.string().min(1).max(500),
 });
 
+export const sidebarStateSchema = z.object({ open: z.boolean() });
+
+export const peekHoverSchema = z.object({
+  zone: z.enum(["gutter", "panel"]),
+  isInside: z.boolean(),
+});
+
 function handle<
   Channel extends keyof InvokeContract,
   Schema extends z.ZodType<unknown, InvokeContract[Channel]["input"]>,
@@ -98,6 +105,17 @@ export function registerIpcHandlers(
   listen("overlay:toast", toastSchema, (toast) => overlay.showToast(toast));
   listen("overlay:open-palette", z.undefined(), () =>
     overlay.openPalette(tabs.getActiveUrl())
+  );
+  listen("sidebar:state", sidebarStateSchema, ({ open }) =>
+    overlay.setSidebarOpen(open)
+  );
+  listen("peek:hover", peekHoverSchema, ({ zone, isInside }) =>
+    overlay.setPeekHover(zone, isInside)
+  );
+  listen("overlay:peek-dismiss", z.undefined(), () => overlay.dismissPeek());
+  listen("overlay:peek-exited", z.undefined(), () => overlay.confirmPeekExit());
+  listen("overlay:toggle-sidebar", z.undefined(), () =>
+    overlay.toggleSidebar()
   );
   listen("overlay:close", z.undefined(), () => overlay.closeModal());
   listen("overlay:report-content-height", contentHeightSchema, (height) =>

@@ -24,6 +24,8 @@ const IDLE_API: AppApi = {
   setViewBounds: () => {},
   showToast: () => {},
   openPalette: () => {},
+  reportSidebarOpen: () => {},
+  reportGutterHover: () => {},
   onTabsChanged: () => () => {},
   onThemeChanged: () => () => {},
   onToggleSidebar: () => () => {},
@@ -35,6 +37,11 @@ const IDLE_OVERLAY_API: OverlayApi = {
   close: () => {},
   onOpen: () => () => {},
   onToast: () => () => {},
+  onPeek: () => () => {},
+  reportPanelHover: () => {},
+  dismissPeek: () => {},
+  confirmPeekExit: () => {},
+  toggleSidebar: () => {},
 };
 
 function renderPalette(initialQuery: string) {
