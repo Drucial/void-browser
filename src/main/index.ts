@@ -8,6 +8,7 @@ import { openMigratedDatabase } from "./db/database";
 import { registerIpcHandlers } from "./ipc/register-ipc-handlers";
 import type { OverlayManager } from "./overlay/overlay-manager";
 import { createOverlayManager } from "./overlay/overlay-manager";
+import { watchPaletteShortcut } from "./overlay/palette-shortcut";
 import { cleanUserAgent } from "./tabs/clean-user-agent";
 import { withColorSchemeHint } from "./tabs/color-scheme-hint";
 import type { TabManager } from "./tabs/tab-manager";
@@ -58,6 +59,11 @@ function createWindow(
     overlay.dispose();
     tabs.dispose();
   });
+  watchPaletteShortcut(
+    window.webContents,
+    tabs.getActiveUrl,
+    overlay.openPalette
+  );
   overlay.attach(window);
   tabs.restore(window);
   loadRendererEntry(window.webContents, "index.html");
@@ -104,6 +110,9 @@ app.whenReady().then(() => {
     loadPage: (contents) => loadRendererEntry(contents, "overlay.html"),
     focusActiveTab: tabs.focusActive,
   });
+  tabs.onViewCreated((contents) =>
+    watchPaletteShortcut(contents, tabs.getActiveUrl, overlay.openPalette)
+  );
   registerIpcHandlers(tabs, theme, overlay, db);
   createWindow(tabs, theme, overlay);
 

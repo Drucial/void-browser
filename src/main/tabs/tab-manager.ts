@@ -1,4 +1,4 @@
-import type { BrowserWindow } from "electron";
+import type { BrowserWindow, WebContents } from "electron";
 import { WebContentsView } from "electron";
 
 import type { Tab, TabsSnapshot, ViewBounds } from "../../shared/ipc";
@@ -22,6 +22,7 @@ export function createTabManager(db: AppDatabase, theme: ThemeController) {
   let activeId: number | null = null;
   let bounds: ViewBounds = HIDDEN_BOUNDS;
   const stackListeners = new Set<() => void>();
+  const viewListeners = new Set<(contents: WebContents) => void>();
 
   theme.onChanged((state) => {
     for (const view of views.values()) {
@@ -119,6 +120,7 @@ export function createTabManager(db: AppDatabase, theme: ThemeController) {
 
     view.setBackgroundColor(getBackgroundColor(theme.getState().isDark));
     views.set(tab.id, view);
+    viewListeners.forEach((listener) => listener(view.webContents));
     trackNavigation(tab, view);
     const url = normalizeUrl(tab.url);
     if (url) loadUrl(view, url);
@@ -149,6 +151,13 @@ export function createTabManager(db: AppDatabase, theme: ThemeController) {
       stackListeners.add(listener);
 
       return () => stackListeners.delete(listener);
+    },
+
+    /** Runs `listener` with the contents of every tab view as it is created; returns an unsubscribe. */
+    onViewCreated(listener: (contents: WebContents) => void) {
+      viewListeners.add(listener);
+
+      return () => viewListeners.delete(listener);
     },
 
     /** Returns the active tab's url, or an empty string when there is none. */
