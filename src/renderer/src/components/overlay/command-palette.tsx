@@ -92,7 +92,7 @@ export function CommandPalette({
           setHasMovedHighlight(false);
         }}
       />
-      <CommandList className="mx-1 mt-2 h-72">
+      <CommandList className="mt-2 h-72">
         {action && (
           <CommandItem
             value={ACTION_ROW_VALUE}

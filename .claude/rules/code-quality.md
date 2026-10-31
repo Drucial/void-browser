@@ -72,6 +72,7 @@ Search before creating anything new.
 - `src/renderer/src/components/ui/**` is vendored shadcn output the CLI re-fetches, so it is exempt from the no-comments rule, `react-hooks/purity`, and its other ui-scoped lint overrides in `eslint.config.mjs`. App code is not exempt.
 - A local edit to a vendored `components/ui` primitive needs the user's explicit approval and is recorded here (primitive and change) so it can be re-checked after any `shadcn add ... --overwrite`.
   - `command.tsx`: `CommandDialog` passes `commandProps` to `Command`.
+  - `command.tsx`: `CommandList` has `mx-1`, aligning it with the `CommandInput` wrapper inset.
   - `sonner.tsx`: no `next-themes`; `theme="system"` is set directly.
   - `hooks/use-mobile.ts` (CLI-managed): keep our `useSyncExternalStore` version.
 - The vendored style is `radix-maia` (`components.json`). `shadcn` is a runtime dependency pinned to the CLI version, only for `@import "shadcn/tailwind.css"` (the `data-open:`/`data-closed:` variants the components use). The app font is the system stack. Never let the CLI add `next-themes`.
