@@ -34,25 +34,23 @@ export function BrowserShell() {
     <SidebarProvider>
       <SidebarToggleListener />
       <Sidebar variant="inset">
-        <SidebarHeader>
-          <div className="-mx-1 flex items-center gap-2">
-            <SidebarMenu className="min-w-0 flex-1">
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  aria-label="Address bar"
-                  variant="outline"
-                  onClick={() => window.api.openPalette()}
-                >
-                  <span>
-                    {activeTab
-                      ? getSiteLabel(activeTab.url)
-                      : "Search or enter an address"}
-                  </span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-            <SidebarTrigger />
-          </div>
+        <SidebarHeader className="flex-row items-center">
+          <SidebarMenu className="min-w-0 flex-1">
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                aria-label="Address bar"
+                variant="outline"
+                onClick={() => window.api.openPalette()}
+              >
+                <span>
+                  {activeTab
+                    ? getSiteLabel(activeTab.url)
+                    : "Search or enter an address"}
+                </span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+          <SidebarTrigger />
         </SidebarHeader>
         <SidebarContent>
           <TabList
