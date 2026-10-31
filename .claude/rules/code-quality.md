@@ -74,7 +74,7 @@ Search before creating anything new.
   - `command.tsx`: `CommandDialog` passes `commandProps` to `Command`.
   - `sonner.tsx`: no `next-themes`; `theme="system"` is set directly.
   - `hooks/use-mobile.ts` (CLI-managed): keep our `useSyncExternalStore` version.
-- The vendored style is `radix-maia` (`components.json`). `shadcn` is a runtime dependency pinned to the CLI version, only for `@import "shadcn/tailwind.css"` (the `data-open:`/`data-closed:` variants the components use). The app font is Inter via `@fontsource-variable/inter`. Never let the CLI add `next-themes`.
+- The vendored style is `radix-maia` (`components.json`). `shadcn` is a runtime dependency pinned to the CLI version, only for `@import "shadcn/tailwind.css"` (the `data-open:`/`data-closed:` variants the components use). The app font is the system stack. Never let the CLI add `next-themes`.
 
 ## Tests
 
