@@ -27,6 +27,7 @@ const api: AppApi = {
   setTheme: (preference) => invoke("theme:set", preference),
   setViewBounds: (bounds) => send("view:set-bounds", bounds),
   showToast: (toast) => send("overlay:toast", toast),
+  openPalette: () => send("overlay:open-palette", undefined),
   onTabsChanged: (listener) => {
     const handle = () => listener();
     ipcRenderer.on("tabs:changed", handle);

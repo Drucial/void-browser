@@ -1,8 +1,14 @@
 import { contextBridge, ipcRenderer } from "electron";
 
-import type { OverlayApi, ThemeApi, ToastRequest } from "../shared/ipc";
+import type {
+  OverlayApi,
+  OverlayDataApi,
+  PaletteIntent,
+  ToastRequest,
+} from "../shared/ipc";
 
-const api: ThemeApi = {
+const api: OverlayDataApi = {
+  searchHistory: (query) => ipcRenderer.invoke("history:search", query),
   getTheme: () => ipcRenderer.invoke("theme:get"),
   onThemeChanged: (listener) => {
     const handle = () => listener();
@@ -15,6 +21,14 @@ const api: ThemeApi = {
 const overlayApi: OverlayApi = {
   reportContentHeight: (height) =>
     ipcRenderer.send("overlay:report-content-height", height),
+  navigate: (request) => ipcRenderer.invoke("overlay:navigate", request),
+  close: () => ipcRenderer.send("overlay:close"),
+  onOpen: (listener) => {
+    const handle = (_event: unknown, intent: PaletteIntent) => listener(intent);
+    ipcRenderer.on("overlay:open", handle);
+
+    return () => ipcRenderer.removeListener("overlay:open", handle);
+  },
   onToast: (listener) => {
     const handle = (_event: unknown, toast: ToastRequest) => listener(toast);
     ipcRenderer.on("overlay:toast", handle);

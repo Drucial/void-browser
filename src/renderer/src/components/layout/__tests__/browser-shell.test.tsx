@@ -52,6 +52,7 @@ function installApi() {
     setTheme: () => Promise.resolve(),
     setViewBounds: () => {},
     showToast: () => {},
+    openPalette: () => {},
     onTabsChanged: (listener) => {
       listeners.add(listener);
 

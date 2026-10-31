@@ -30,6 +30,11 @@ export const boundsSchema = z.object({
   height: z.number().int().nonnegative(),
 });
 
+export const navigateRequestSchema = z.object({
+  url: urlSchema,
+  newTab: z.boolean(),
+});
+
 export const contentHeightSchema = z.number().int().nonnegative();
 
 export const toastSchema = z.object({
@@ -71,6 +76,11 @@ export function registerIpcHandlers(
   handle("tabs:close", tabIdSchema, (id) => tabs.close(id));
   handle("tabs:activate", tabIdSchema, (id) => tabs.activate(id));
   handle("tabs:navigate", urlSchema, (url) => tabs.navigateActive(url));
+  handle("overlay:navigate", navigateRequestSchema, ({ url, newTab }) => {
+    overlay.closeModal();
+    if (newTab) tabs.create(url);
+    else tabs.navigateActive(url);
+  });
   handle("history:search", z.string().max(500), (query) =>
     searchHistory(
       db,
@@ -87,6 +97,10 @@ export function registerIpcHandlers(
     overlay.setPageBounds(bounds);
   });
   listen("overlay:toast", toastSchema, (toast) => overlay.showToast(toast));
+  listen("overlay:open-palette", z.undefined(), () =>
+    overlay.openPalette(tabs.getActiveUrl())
+  );
+  listen("overlay:close", z.undefined(), () => overlay.closeModal());
   listen("overlay:report-content-height", contentHeightSchema, (height) =>
     overlay.reportContentHeight(height)
   );

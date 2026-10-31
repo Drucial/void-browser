@@ -5,6 +5,7 @@ import type { ThemePreference } from "../main/db/settings";
 import type {
   boundsSchema,
   contentHeightSchema,
+  navigateRequestSchema,
   toastSchema,
 } from "../main/ipc/register-ipc-handlers";
 
@@ -31,12 +32,17 @@ export type ViewBounds = z.infer<typeof boundsSchema>;
 
 export type ToastRequest = z.infer<typeof toastSchema>;
 
+export type NavigateRequest = z.input<typeof navigateRequestSchema>;
+
+export type PaletteIntent = { query: string };
+
 export type InvokeContract = {
   "tabs:list": { input: undefined; output: TabsSnapshot };
   "tabs:create": { input: string | undefined; output: void };
   "tabs:close": { input: number; output: void };
   "tabs:activate": { input: number; output: void };
   "tabs:navigate": { input: string; output: void };
+  "overlay:navigate": { input: NavigateRequest; output: void };
   "history:search": { input: string; output: HistoryEntry[] };
   "theme:get": { input: undefined; output: ThemeState };
   "theme:set": { input: ThemePreference; output: void };
@@ -45,6 +51,8 @@ export type InvokeContract = {
 export type SendContract = {
   "view:set-bounds": ViewBounds;
   "overlay:toast": ToastRequest;
+  "overlay:open-palette": undefined;
+  "overlay:close": undefined;
   "overlay:report-content-height": z.infer<typeof contentHeightSchema>;
 };
 
@@ -59,13 +67,20 @@ export type AppApi = {
   setTheme: (preference: ThemePreference) => Promise<void>;
   setViewBounds: (bounds: ViewBounds) => void;
   showToast: (toast: ToastRequest) => void;
+  openPalette: () => void;
   onTabsChanged: (listener: () => void) => () => void;
   onThemeChanged: (listener: () => void) => () => void;
 };
 
-export type ThemeApi = Pick<AppApi, "getTheme" | "onThemeChanged">;
+export type OverlayDataApi = Pick<
+  AppApi,
+  "getTheme" | "onThemeChanged" | "searchHistory"
+>;
 
 export type OverlayApi = {
   reportContentHeight: (height: number) => void;
+  navigate: (request: NavigateRequest) => Promise<void>;
+  close: () => void;
+  onOpen: (listener: (intent: PaletteIntent) => void) => () => void;
   onToast: (listener: (toast: ToastRequest) => void) => () => void;
 };

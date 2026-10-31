@@ -101,11 +101,12 @@ export function createOverlayManager({
       applyBounds();
     },
 
-    /** Covers the window with the overlay and gives it keyboard focus. */
-    openModal() {
+    /** Covers the window with the overlay and shows the command palette prefilled with `query`. */
+    openPalette(query: string) {
       state.openModal();
       applyBounds();
       view?.webContents.focus();
+      view?.webContents.send("overlay:open", { query });
     },
 
     /** Uncovers the window and returns focus to the active tab. */

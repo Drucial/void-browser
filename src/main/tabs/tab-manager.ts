@@ -151,6 +151,11 @@ export function createTabManager(db: AppDatabase, theme: ThemeController) {
       return () => stackListeners.delete(listener);
     },
 
+    /** Returns the active tab's url, or an empty string when there is none. */
+    getActiveUrl() {
+      return listTabs(db).find((tab) => tab.id === activeId)?.url ?? "";
+    },
+
     /** Moves keyboard focus to the active tab's page. */
     focusActive() {
       getActiveView()?.webContents.focus();
