@@ -19,7 +19,18 @@ describe("resolveSubmission", () => {
     ).toEqual({ url: "https://example.org/", newTab: true });
   });
 
-  it("falls back to the typed text when the highlight is no longer listed", () => {
+  it("opens the first result before anything is highlighted", () => {
+    expect(
+      resolveSubmission({
+        query: "exa",
+        results: RESULTS,
+        highlightedUrl: "",
+        isNewTab: false,
+      })
+    ).toEqual({ url: "https://example.com/", newTab: false });
+  });
+
+  it("falls back to the typed text when there are no results", () => {
     expect(
       resolveSubmission({
         query: " nowhere.dev ",
