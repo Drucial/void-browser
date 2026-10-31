@@ -72,12 +72,12 @@ describe("overlay state", () => {
     });
   });
 
-  it("covers the inset left panel while peeking and keeps it through the slide-out", () => {
+  it("covers the left panel and its shadow room while peeking and keeps it through the slide-out", () => {
     const state = createReadyState();
     state.setSidebarOpen(false);
     state.showPeek();
 
-    const panel = { x: 8, y: 8, width: 256, height: 684 };
+    const panel = { x: 0, y: 8, width: 288, height: 692 };
     expect(state.getBounds()).toEqual(panel);
 
     state.hidePeek();
@@ -109,10 +109,10 @@ describe("overlay state", () => {
     state.reportContentHeight(90);
 
     expect(state.getBounds()).toEqual({
-      x: 8,
+      x: 0,
       y: 8,
-      width: 992,
-      height: 684,
+      width: 1000,
+      height: 692,
     });
   });
 

@@ -4,6 +4,7 @@ const TOAST_WIDTH = 380; // the overlay renderer lays toasts out to fill this wi
 const PROVISIONAL_TOAST_HEIGHT = 120; // covers the first toast until the overlay renderer reports its real height
 const PEEK_WIDTH = 256; // matches the 16rem sidebar the peek panel mirrors
 const PEEK_INSET = 8; // matches the window gutter around the page card
+const PEEK_SHADOW_MARGIN = 24; // transparent room right of the panel for its shadow-xl, which the view would otherwise clip
 
 type PeekPhase = "off" | "open" | "closing";
 
@@ -48,10 +49,10 @@ export function createOverlayState() {
     if (peekPhase === "off") return null;
 
     return {
-      x: PEEK_INSET,
+      x: 0,
       y: PEEK_INSET,
-      width: PEEK_WIDTH,
-      height: Math.max(windowSize.height - PEEK_INSET * 2, 0),
+      width: PEEK_INSET + PEEK_WIDTH + PEEK_SHADOW_MARGIN,
+      height: Math.max(windowSize.height - PEEK_INSET, 0),
     };
   }
 
