@@ -18,7 +18,6 @@ const IDLE_API: AppApi = {
   createTab: () => Promise.resolve(),
   closeTab: () => Promise.resolve(),
   activateTab: () => Promise.resolve(),
-  navigateActiveTab: () => Promise.resolve(),
   searchHistory: () => Promise.resolve({ entries: [] }),
   getTheme: () => Promise.resolve({ preference: "system", isDark: false }),
   setTheme: () => Promise.resolve(),

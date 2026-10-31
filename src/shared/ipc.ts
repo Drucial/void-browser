@@ -45,7 +45,6 @@ export type InvokeContract = {
   "tabs:create": { input: string | undefined; output: void };
   "tabs:close": { input: number; output: void };
   "tabs:activate": { input: number; output: void };
-  "tabs:navigate": { input: string; output: void };
   "overlay:navigate": { input: NavigateRequest; output: void };
   "history:search": { input: string; output: HistorySearchResult };
   "theme:get": { input: undefined; output: ThemeState };
@@ -65,7 +64,6 @@ export type AppApi = {
   createTab: (url?: string) => Promise<void>;
   closeTab: (id: number) => Promise<void>;
   activateTab: (id: number) => Promise<void>;
-  navigateActiveTab: (url: string) => Promise<void>;
   searchHistory: (query: string) => Promise<HistorySearchResult>;
   getTheme: () => Promise<ThemeState>;
   setTheme: (preference: ThemePreference) => Promise<void>;

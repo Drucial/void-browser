@@ -51,7 +51,6 @@ function installApi() {
 
       return Promise.resolve();
     },
-    navigateActiveTab: () => Promise.resolve(),
     searchHistory: () => Promise.resolve({ entries: [] }),
     getTheme: () => Promise.resolve({ preference: "system", isDark: false }),
     setTheme: () => Promise.resolve(),

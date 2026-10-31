@@ -75,7 +75,6 @@ export function registerIpcHandlers(
   handle("tabs:create", urlSchema.optional(), (url) => tabs.create(url));
   handle("tabs:close", tabIdSchema, (id) => tabs.close(id));
   handle("tabs:activate", tabIdSchema, (id) => tabs.activate(id));
-  handle("tabs:navigate", urlSchema, (url) => tabs.navigateActive(url));
   handle("overlay:navigate", navigateRequestSchema, ({ url, newTab }) => {
     overlay.closeModal();
     if (newTab) tabs.create(url);
