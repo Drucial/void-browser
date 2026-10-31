@@ -71,4 +71,63 @@ describe("overlay state", () => {
       height: 90,
     });
   });
+
+  it("covers the inset left panel while peeking and keeps it through the slide-out", () => {
+    const state = createReadyState();
+    state.setSidebarOpen(false);
+    state.showPeek();
+
+    const panel = { x: 8, y: 8, width: 256, height: 684 };
+    expect(state.getBounds()).toEqual(panel);
+
+    state.hidePeek();
+
+    expect(state.getBounds()).toEqual(panel);
+
+    state.finishPeekExit();
+
+    expect(state.getBounds()).toBeNull();
+  });
+
+  it("ignores peek requests while the sidebar is open and hides an open peek when it opens", () => {
+    const state = createReadyState();
+    state.showPeek();
+
+    expect(state.getPeekPhase()).toBe("off");
+
+    state.setSidebarOpen(false);
+    state.showPeek();
+    state.setSidebarOpen(true);
+
+    expect(state.getPeekPhase()).toBe("closing");
+  });
+
+  it("covers both the panel and the toast with their union", () => {
+    const state = createReadyState();
+    state.setSidebarOpen(false);
+    state.showPeek();
+    state.reportContentHeight(90);
+
+    expect(state.getBounds()).toEqual({
+      x: 8,
+      y: 8,
+      width: 992,
+      height: 684,
+    });
+  });
+
+  it("ends the peek when a modal opens and refuses a peek while it is open", () => {
+    const state = createReadyState();
+    state.setSidebarOpen(false);
+    state.showPeek();
+    state.openModal();
+
+    expect(state.getPeekPhase()).toBe("off");
+    expect(state.getBounds()).toEqual({ x: 0, y: 0, ...WINDOW });
+
+    state.showPeek();
+    state.closeModal();
+
+    expect(state.getBounds()).toBeNull();
+  });
 });

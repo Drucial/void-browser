@@ -7,6 +7,7 @@ import type { ToastRequest, ViewBounds } from "../../shared/ipc";
 import { createOverlayState } from "./overlay-state";
 
 const TRANSPARENT = "#00000000";
+const PEEK_EXIT_TIMEOUT_MS = 400; // hides the view even if the renderer never confirms its 200ms slide-out
 
 export type OverlayManager = ReturnType<typeof createOverlayManager>;
 
@@ -24,6 +25,7 @@ export function createOverlayManager({
   let window: BrowserWindow | null = null;
   let view: WebContentsView | null = null;
   let isShowing = false;
+  let peekExitTimer: ReturnType<typeof setTimeout> | undefined;
 
   function applyBounds() {
     if (!view) return;
@@ -42,6 +44,36 @@ export function createOverlayManager({
     const hadFocus = view.webContents.isFocused();
     view.setVisible(false);
     if (hadFocus) focusActiveTab();
+  }
+
+  function sendPeek(isOpen: boolean) {
+    view?.webContents.send("overlay:peek", { isOpen });
+  }
+
+  function endPeekExit() {
+    clearTimeout(peekExitTimer);
+    peekExitTimer = undefined;
+    state.finishPeekExit();
+    applyBounds();
+  }
+
+  function showPeek() {
+    state.showPeek();
+    if (state.getPeekPhase() !== "open") return;
+
+    clearTimeout(peekExitTimer);
+    peekExitTimer = undefined;
+    applyBounds();
+    sendPeek(true);
+  }
+
+  function hidePeek() {
+    state.hidePeek();
+    if (state.getPeekPhase() !== "closing") return;
+
+    sendPeek(false);
+    clearTimeout(peekExitTimer);
+    peekExitTimer = setTimeout(endPeekExit, PEEK_EXIT_TIMEOUT_MS);
   }
 
   function syncWindowSize() {
@@ -74,6 +106,7 @@ export function createOverlayManager({
 
     /** Closes the overlay view and detaches from the window. */
     dispose() {
+      clearTimeout(peekExitTimer);
       view?.webContents.close();
       view = null;
       window = null;
@@ -101,9 +134,30 @@ export function createOverlayManager({
       applyBounds();
     },
 
+    /** Slides the floating nav in over the page; does nothing while the sidebar is open or the palette is. */
+    showPeek,
+
+    /** Slides the floating nav out, then hides the overlay once the renderer confirms or the exit times out. */
+    hidePeek,
+
+    /** Ends the slide-out the renderer was asked for. */
+    confirmPeekExit() {
+      if (state.getPeekPhase() === "closing") endPeekExit();
+    },
+
+    /** Records whether the shell's sidebar is pinned open; opening it hides the floating nav. */
+    setSidebarOpen(open: boolean) {
+      state.setSidebarOpen(open);
+      if (open) hidePeek();
+    },
+
     /** Covers the window with the overlay and shows the command palette prefilled with `query`. */
     openPalette(query: string) {
+      const wasPeeking = state.getPeekPhase() !== "off";
+      clearTimeout(peekExitTimer);
+      peekExitTimer = undefined;
       state.openModal();
+      if (wasPeeking) sendPeek(false);
       applyBounds();
       view?.webContents.focus();
       view?.webContents.send("overlay:open", { query });
