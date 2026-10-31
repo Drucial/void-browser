@@ -8,7 +8,7 @@ export const SEARCH_ENGINE_NAME = "DuckDuckGo"; // names the engine behind SEARC
 
 const EXPLICIT_SCHEME = /^[a-z][a-z\d+.-]*:\/\//i;
 const ALLOWED_PROTOCOLS = ["http:", "https:"];
-const SCHEME_WITHOUT_SLASHES = /^[a-z][a-z\d+.-]*:(?!\d+(?:[/?#]|$))/i;
+const SCHEME_WITHOUT_SLASHES = /^[a-z][a-z\d+.-]*:(?!\d*$|\d+[/?#])/i;
 const IPV4_AUTHORITY = /^(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?$/;
 const WORD_TLD = /^(?:[a-z]{2,}|xn--[a-z\d-]+)$/;
 

@@ -23,7 +23,10 @@ describe("resolveAddressInput", () => {
   it.each([
     ["google.com", "url", "https://google.com/"],
     ["https://x.dev/a?b=1", "url", "https://x.dev/a?b=1"],
+    ["localhost:", "url", "https://localhost/"],
+    ["localhost:3", "url", "https://localhost:3/"],
     ["localhost:3000", "url", "https://localhost:3000/"],
+    ["example.com:", "url", "https://example.com/"],
     ["192.168.0.1", "url", "https://192.168.0.1/"],
     ["münchen.de", "url", "https://xn--mnchen-3ya.de/"],
     ["cats", "search", "https://duckduckgo.com/?q=cats"],
@@ -38,5 +41,16 @@ describe("resolveAddressInput", () => {
     expect(resolveAddressInput("   ")).toBeNull();
     expect(resolveAddressInput("javascript:alert(1)")).toBeNull();
     expect(resolveAddressInput("file:///etc/passwd")).toBeNull();
+  });
+
+  it.each([
+    "javascript:alert(1)",
+    "javascript:x",
+    "mailto:a@b.c",
+    "data:text/html,<p>",
+    "note:todo",
+    "about:blank",
+  ])("returns null for the scheme %s", (input) => {
+    expect(resolveAddressInput(input)).toBeNull();
   });
 });
