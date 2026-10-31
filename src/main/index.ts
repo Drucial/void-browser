@@ -115,6 +115,7 @@ app.whenReady().then(() => {
   const overlay = createOverlayManager({
     loadPage: (contents) => loadRendererEntry(contents, "overlay.html"),
     focusActiveTab: tabs.focusActive,
+    getActiveUrl: tabs.getActiveUrl,
     requestSidebarToggle,
   });
   tabs.onChanged(overlay.notifyTabsChanged);

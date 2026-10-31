@@ -4,7 +4,9 @@ import type { BrowserWindow, WebContents } from "electron";
 import { WebContentsView } from "electron";
 
 import type { PeekZone, ToastRequest, ViewBounds } from "../../shared/ipc";
+import { watchSidebarShortcut } from "../shortcuts/sidebar-shortcut";
 import { createOverlayState } from "./overlay-state";
+import { watchPaletteShortcut } from "./palette-shortcut";
 import { createPeekHover } from "./peek-hover";
 
 const TRANSPARENT = "#00000000";
@@ -15,6 +17,7 @@ export type OverlayManager = ReturnType<typeof createOverlayManager>;
 type OverlayDeps = {
   loadPage: (contents: WebContents) => void;
   focusActiveTab: () => void;
+  getActiveUrl: () => string;
   requestSidebarToggle: () => void;
 };
 
@@ -22,6 +25,7 @@ type OverlayDeps = {
 export function createOverlayManager({
   loadPage,
   focusActiveTab,
+  getActiveUrl,
   requestSidebarToggle,
 }: OverlayDeps) {
   const state = createOverlayState();
@@ -80,6 +84,18 @@ export function createOverlayManager({
     peekExitTimer = setTimeout(endPeekExit, PEEK_EXIT_TIMEOUT_MS);
   }
 
+  function openPalette(query: string) {
+    const wasPeeking = state.getPeekPhase() !== "off";
+    hover.reset();
+    clearTimeout(peekExitTimer);
+    peekExitTimer = undefined;
+    state.openModal();
+    if (wasPeeking) sendPeek(false);
+    applyBounds();
+    view?.webContents.focus();
+    view?.webContents.send("overlay:open", { query });
+  }
+
   const hover = createPeekHover({ onShow: showPeek, onHide: hidePeek });
 
   function syncWindowSize() {
@@ -104,6 +120,8 @@ export function createOverlayManager({
       });
       view.setBackgroundColor(TRANSPARENT);
       view.setVisible(false);
+      watchPaletteShortcut(view.webContents, getActiveUrl, openPalette);
+      watchSidebarShortcut(view.webContents, requestSidebarToggle);
       loadPage(view.webContents);
       target.contentView.addChildView(view);
       target.on("resize", syncWindowSize);
@@ -175,17 +193,7 @@ export function createOverlayManager({
     toggleSidebar: requestSidebarToggle,
 
     /** Covers the window with the overlay and shows the command palette prefilled with `query`. */
-    openPalette(query: string) {
-      const wasPeeking = state.getPeekPhase() !== "off";
-      hover.reset();
-      clearTimeout(peekExitTimer);
-      peekExitTimer = undefined;
-      state.openModal();
-      if (wasPeeking) sendPeek(false);
-      applyBounds();
-      view?.webContents.focus();
-      view?.webContents.send("overlay:open", { query });
-    },
+    openPalette,
 
     /** Uncovers the window and returns focus to the active tab. */
     closeModal() {
